@@ -577,28 +577,18 @@ static.clip = function(op, subj, clip, polyClass) {
 			
 			
 			/* Process each node in the intersection table */
-			for (var intersect = it_table.top_node ; (intersect != null); intersect = intersect.next) {
+			for (var intersect = it_table.top_node; intersect != null; intersect = intersect.next) {
 				e0 = intersect.ie[0];
 				e1 = intersect.ie[1];
 
 				/* Only generate output for contributing intersections */
-				if ((e0.bundle[Clip.ABOVE][Clip.CLIP] != 0 || e0.bundle[Clip.ABOVE][Clip.SUBJ] != 0) &&
-					(e1.bundle[Clip.ABOVE][Clip.CLIP] != 0 || e1.bundle[Clip.ABOVE][Clip.SUBJ] != 0)) {
+				if ((e0.bundle[Clip.ABOVE][Clip.CLIP] != 0 || e0.bundle[Clip.ABOVE][Clip.SUBJ] != 0) && (e1.bundle[Clip.ABOVE][Clip.CLIP] != 0 || e1.bundle[Clip.ABOVE][Clip.SUBJ] != 0)) {
 					var p = e0.outp[Clip.ABOVE];
 					var q = e1.outp[Clip.ABOVE];
 					var ix = intersect.point.x;
 					var iy = intersect.point.y + yb;
-
-					var in_clip = ((e0.bundle[Clip.ABOVE][Clip.CLIP] != 0 && !(e0.bside[Clip.CLIP] != 0)) ||
-									(e1.bundle[Clip.ABOVE][Clip.CLIP] != 0 && e1.bside[Clip.CLIP] != 0) ||
-									(!(e0.bundle[Clip.ABOVE][Clip.CLIP] != 0) && !(e1.bundle[Clip.ABOVE][Clip.CLIP] != 0) &&
-									e0.bside[Clip.CLIP] != 0 && e1.bside[Clip.CLIP] != 0)) ? 1 : 0;
-
-					var in_subj = ((e0.bundle[Clip.ABOVE][Clip.SUBJ] != 0 && !(e0.bside[Clip.SUBJ] != 0)) ||
-									(e1.bundle[Clip.ABOVE][Clip.SUBJ] != 0 && e1.bside[Clip.SUBJ] != 0) ||
-									(!(e0.bundle[Clip.ABOVE][Clip.SUBJ] != 0) && !(e1.bundle[Clip.ABOVE][Clip.SUBJ] != 0) &&
-									e0.bside[Clip.SUBJ] != 0 && e1.bside[Clip.SUBJ] != 0)) ? 1: 0;
-
+					var in_clip = ((e0.bundle[Clip.ABOVE][Clip.CLIP] != 0 && !(e0.bside[Clip.CLIP] != 0)) || (e1.bundle[Clip.ABOVE][Clip.CLIP] != 0 && e1.bside[Clip.CLIP] != 0) || (!(e0.bundle[Clip.ABOVE][Clip.CLIP] != 0) && !(e1.bundle[Clip.ABOVE][Clip.CLIP] != 0) && e0.bside[Clip.CLIP] != 0 && e1.bside[Clip.CLIP] != 0)) ? 1 : 0;
+					var in_subj = ((e0.bundle[Clip.ABOVE][Clip.SUBJ] != 0 && !(e0.bside[Clip.SUBJ] != 0)) || (e1.bundle[Clip.ABOVE][Clip.SUBJ] != 0 && e1.bside[Clip.SUBJ] != 0) || (!(e0.bundle[Clip.ABOVE][Clip.SUBJ] != 0) && !(e1.bundle[Clip.ABOVE][Clip.SUBJ] != 0) && e0.bside[Clip.SUBJ] != 0 && e1.bside[Clip.SUBJ] != 0)) ? 1: 0;
 					var tr = 0
 					var tl = 0;
 					var br = 0;
@@ -606,588 +596,438 @@ static.clip = function(op, subj, clip, polyClass) {
 					/* Determine quadrant occupancies */
 					if (op == OperationType.GPC_DIFF || op == OperationType.GPC_INT) {
 						tr = (in_clip != 0 && in_subj != 0) ? 1 : 0;
-						tl = (((in_clip ^ e1.bundle[Clip.ABOVE][Clip.CLIP]) != 0) && ((in_subj ^ e1.bundle[Clip.ABOVE][Clip.SUBJ]) != 0))?1:0;
-						br = (((in_clip ^ e0.bundle[Clip.ABOVE][Clip.CLIP]) != 0) && ((in_subj ^ e0.bundle[Clip.ABOVE][Clip.SUBJ]) != 0))?1:0;
-						bl = (((in_clip ^ e1.bundle[Clip.ABOVE][Clip.CLIP] ^ e0.bundle[Clip.ABOVE][Clip.CLIP]) != 0) &&
-								((in_subj ^ e1.bundle[Clip.ABOVE][Clip.SUBJ] ^ e0.bundle[Clip.ABOVE][Clip.SUBJ]) != 0) ) ? 1:0;
-					}
-					else if (op == OperationType.GPC_XOR) {
-						tr= in_clip^ in_subj;
-						tl= (in_clip ^ e1.bundle[Clip.ABOVE][Clip.CLIP]) ^ (in_subj ^ e1.bundle[Clip.ABOVE][Clip.SUBJ]);
-						br= (in_clip ^ e0.bundle[Clip.ABOVE][Clip.CLIP]) ^ (in_subj ^ e0.bundle[Clip.ABOVE][Clip.SUBJ]);
-						bl= (in_clip ^ e1.bundle[Clip.ABOVE][Clip.CLIP] ^ e0.bundle[Clip.ABOVE][Clip.CLIP])
-							^ (in_subj ^ e1.bundle[Clip.ABOVE][Clip.SUBJ] ^ e0.bundle[Clip.ABOVE][Clip.SUBJ]);
-					}
-					else if ( op == OperationType.GPC_UNION ) {
-						tr= ((in_clip != 0) || (in_subj != 0)) ? 1: 0;
-						tl= (((in_clip ^ e1.bundle[Clip.ABOVE][Clip.CLIP]) != 0) || ((in_subj ^ e1.bundle[Clip.ABOVE][Clip.SUBJ]) != 0)) ? 1: 0;
-						br= (((in_clip ^ e0.bundle[Clip.ABOVE][Clip.CLIP]) != 0) || ((in_subj ^ e0.bundle[Clip.ABOVE][Clip.SUBJ]) != 0)) ? 1: 0;
-						bl= (((in_clip ^ e1.bundle[Clip.ABOVE][Clip.CLIP] ^ e0.bundle[Clip.ABOVE][Clip.CLIP]) != 0) ||
-							((in_subj ^ e1.bundle[Clip.ABOVE][Clip.SUBJ] ^ e0.bundle[Clip.ABOVE][Clip.SUBJ]) != 0)) ? 1: 0;
-					}
-					else
-					{
-						//console.log("ERROR : Unknown op type, "+op);
+						tl = (((in_clip ^ e1.bundle[Clip.ABOVE][Clip.CLIP]) != 0) && ((in_subj ^ e1.bundle[Clip.ABOVE][Clip.SUBJ]) != 0)) ? 1 : 0;
+						br = (((in_clip ^ e0.bundle[Clip.ABOVE][Clip.CLIP]) != 0) && ((in_subj ^ e0.bundle[Clip.ABOVE][Clip.SUBJ]) != 0)) ? 1 : 0;
+						bl = (((in_clip ^ e1.bundle[Clip.ABOVE][Clip.CLIP] ^ e0.bundle[Clip.ABOVE][Clip.CLIP]) != 0) && ((in_subj ^ e1.bundle[Clip.ABOVE][Clip.SUBJ] ^ e0.bundle[Clip.ABOVE][Clip.SUBJ]) != 0) ) ? 1 : 0;
+					} else if (op == OperationType.GPC_XOR) {
+						tr = in_clip^ in_subj;
+						tl = (in_clip ^ e1.bundle[Clip.ABOVE][Clip.CLIP]) ^ (in_subj ^ e1.bundle[Clip.ABOVE][Clip.SUBJ]);
+						br = (in_clip ^ e0.bundle[Clip.ABOVE][Clip.CLIP]) ^ (in_subj ^ e0.bundle[Clip.ABOVE][Clip.SUBJ]);
+						bl = (in_clip ^ e1.bundle[Clip.ABOVE][Clip.CLIP] ^ e0.bundle[Clip.ABOVE][Clip.CLIP]) ^ (in_subj ^ e1.bundle[Clip.ABOVE][Clip.SUBJ] ^ e0.bundle[Clip.ABOVE][Clip.SUBJ]);
+					} else if ( op == OperationType.GPC_UNION ) {
+						tr = (in_clip != 0 || in_subj != 0) ? 1 : 0;
+						tl = (((in_clip ^ e1.bundle[Clip.ABOVE][Clip.CLIP]) != 0) || ((in_subj ^ e1.bundle[Clip.ABOVE][Clip.SUBJ]) != 0)) ? 1 : 0;
+						br = (((in_clip ^ e0.bundle[Clip.ABOVE][Clip.CLIP]) != 0) || ((in_subj ^ e0.bundle[Clip.ABOVE][Clip.SUBJ]) != 0)) ? 1 : 0;
+						bl = (((in_clip ^ e1.bundle[Clip.ABOVE][Clip.CLIP] ^ e0.bundle[Clip.ABOVE][Clip.CLIP]) != 0) || ((in_subj ^ e1.bundle[Clip.ABOVE][Clip.SUBJ] ^ e0.bundle[Clip.ABOVE][Clip.SUBJ]) != 0)) ? 1 : 0;
 					}
 
-					var vclass = VertexType.getType( tr, tl, br, bl );
-					switch (vclass)
-					{
+					var vclass = VertexType.getType(tr, tl, br, bl);
+					switch (vclass) {
 						case VertexType.EMN:
 							e0.outp[Clip.ABOVE] = out_poly.add_local_min(ix, iy);
 							e1.outp[Clip.ABOVE] = e0.outp[Clip.ABOVE];
 							break;
 						case VertexType.ERI:
-							if (p != null)
-							{
+							if (p != null) {
 								p.add_right(ix, iy);
-								e1.outp[Clip.ABOVE]= p;
-								e0.outp[Clip.ABOVE]= null;
+								e1.outp[Clip.ABOVE] = p;
+								e0.outp[Clip.ABOVE] = null;
 							}
 							break;
 						case VertexType.ELI:
-							if (q != null)
-							{
+							if (q != null) {
 								q.add_left(ix, iy);
-								e0.outp[Clip.ABOVE]= q;
-								e1.outp[Clip.ABOVE]= null;
+								e0.outp[Clip.ABOVE] = q;
+								e1.outp[Clip.ABOVE] = null;
 							}
 							break;
 						case VertexType.EMX:
-							if ((p!=null) && (q!=null))
-							{
-								p.add_left( ix, iy);
+							if (p != null && q != null) {
+								p.add_left(ix, iy);
 								out_poly.merge_right(p, q);
-								e0.outp[Clip.ABOVE]= null;
-								e1.outp[Clip.ABOVE]= null;
+								e0.outp[Clip.ABOVE] = null;
+								e1.outp[Clip.ABOVE] = null;
 							}
 							break;
 						case VertexType.IMN:
 							e0.outp[Clip.ABOVE] = out_poly.add_local_min(ix, iy);
-							e1.outp[Clip.ABOVE]= e0.outp[Clip.ABOVE];
+							e1.outp[Clip.ABOVE] = e0.outp[Clip.ABOVE];
 							break;
 						case VertexType.ILI:
-							if (p != null)
-							{
+							if (p != null) {
 								p.add_left(ix, iy);
-								e1.outp[Clip.ABOVE]= p;
-								e0.outp[Clip.ABOVE]= null;
+								e1.outp[Clip.ABOVE] = p;
+								e0.outp[Clip.ABOVE] = null;
 							}
 							break;
 						case VertexType.IRI:
-							if (q!=null)
-							{
+							if (q != null) {
 								q.add_right(ix, iy);
-								e0.outp[Clip.ABOVE]= q;
-								e1.outp[Clip.ABOVE]= null;
+								e0.outp[Clip.ABOVE] = q;
+								e1.outp[Clip.ABOVE] = null;
 							}
 							break;
 						case VertexType.IMX:
-							if ((p!=null) && (q!=null))
-							{
+							if (p != null && q != null) {
 								p.add_right(ix, iy);
 								out_poly.merge_left(p, q);
-								e0.outp[Clip.ABOVE]= null;
-								e1.outp[Clip.ABOVE]= null;
+								e0.outp[Clip.ABOVE] = null;
+								e1.outp[Clip.ABOVE] = null;
 							}
 							break;
 						case VertexType.IMM:
-							if ((p!=null) && (q!=null))
-							{
+							if (p != null && q != null) {
 								p.add_right(ix, iy);
 								out_poly.merge_left(p, q);
 								e0.outp[Clip.ABOVE] = out_poly.add_local_min(ix, iy);
-								e1.outp[Clip.ABOVE]= e0.outp[Clip.ABOVE];
+								e1.outp[Clip.ABOVE] = e0.outp[Clip.ABOVE];
 							}
 							break;
 						case VertexType.EMM:
-							if ((p!=null) && (q!=null))
-							{
+							if (p != null && q != null) {
 								p.add_left(ix, iy);
 								out_poly.merge_right(p, q);
 								e0.outp[Clip.ABOVE] = out_poly.add_local_min(ix, iy);
 								e1.outp[Clip.ABOVE] = e0.outp[Clip.ABOVE];
 							}
 							break;
-						default:
-							break;
-					} /* End of switch */
-				} /* End of contributing intersection conditional */
+					}
+				}
 
 				/* Swap bundle sides in response to edge crossing */
-				if (e0.bundle[Clip.ABOVE][Clip.CLIP]!=0)
-					e1.bside[Clip.CLIP] = (e1.bside[Clip.CLIP]==0)?1:0;
-				if (e1.bundle[Clip.ABOVE][Clip.CLIP]!=0)
-					e0.bside[Clip.CLIP]= (e0.bside[Clip.CLIP]==0)?1:0;
-				if (e0.bundle[Clip.ABOVE][Clip.SUBJ]!=0)
-					e1.bside[Clip.SUBJ]= (e1.bside[Clip.SUBJ]==0)?1:0;
-				if (e1.bundle[Clip.ABOVE][Clip.SUBJ]!=0)
-					e0.bside[Clip.SUBJ]= (e0.bside[Clip.SUBJ]==0)?1:0;
+				if (e0.bundle[Clip.ABOVE][Clip.CLIP] != 0) e1.bside[Clip.CLIP] = (e1.bside[Clip.CLIP] == 0) ? 1 : 0;
+				if (e1.bundle[Clip.ABOVE][Clip.CLIP] != 0) e0.bside[Clip.CLIP] = (e0.bside[Clip.CLIP] == 0) ? 1 : 0;
+				if (e0.bundle[Clip.ABOVE][Clip.SUBJ] != 0) e1.bside[Clip.SUBJ] = (e1.bside[Clip.SUBJ] == 0) ? 1 : 0;
+				if (e1.bundle[Clip.ABOVE][Clip.SUBJ] != 0) e0.bside[Clip.SUBJ] = (e0.bside[Clip.SUBJ] == 0) ? 1 : 0;
 
 				/* Swap e0 and e1 bundles in the AET */
-				var prev_edge= e0.prev;
-				var next_edge= e1.next;
-				if (next_edge != null)
-				{
+				var prev_edge = e0.prev;
+				var next_edge = e1.next;
+				if (next_edge != null) {
 					next_edge.prev = e0;
 				}
 
-				if (e0.bstate[Clip.ABOVE] == BundleState.BUNDLE_HEAD)
-				{
-					var search= true;
-					while (search)
-					{
-						prev_edge= prev_edge.prev;
-						if (prev_edge != null)
-						{
-							if (prev_edge.bstate[Clip.ABOVE] != BundleState.BUNDLE_TAIL)
-							{
-								search= false;
+				if (e0.bstate[Clip.ABOVE] == BundleState.BUNDLE_HEAD) {
+					var search = true;
+					while (search) {
+						prev_edge = prev_edge.prev;
+						if (prev_edge != null) {
+							if (prev_edge.bstate[Clip.ABOVE] != BundleState.BUNDLE_TAIL) {
+								search = false;
 							}
-						}
-						else
-						{
-							search= false;
+						} else {
+							search = false;
 						}
 					}
 				}
-				if (prev_edge == null)
-				{
+				if (prev_edge == null) {
 					aet.top_node.prev = e1;
-					e1.next           = aet.top_node;
-					aet.top_node      = e0.next;
-				}
-				else
-				{
+					e1.next = aet.top_node;
+					aet.top_node = e0.next;
+				} else {
 					prev_edge.next.prev = e1;
-					e1.next             = prev_edge.next;
-					prev_edge.next      = e0.next;
+					e1.next = prev_edge.next;
+					prev_edge.next = e0.next;
 				}
 				e0.next.prev = prev_edge;
 				e1.next.prev = e1;
-				e0.next      = next_edge;
-				if ( Clip.DEBUG )
-				{
-					out_poly.print();
-				}
-			} /* End of IT loop*/
+				e0.next = next_edge;
+			}
 
 			/* Prepare for next scanbeam */
-			for ( var edge= aet.top_node; (edge != null); edge = edge.next)
-			{
+			for (var edge= aet.top_node; edge != null; edge = edge.next) {
 				var next_edge= edge.next;
 				var succ_edge= edge.succ;
-				if ((edge.top.y == yt) && (succ_edge!=null))
-				{
+				if (edge.top.y == yt && succ_edge != null) {
 					/* Replace AET edge by its successor */
-					succ_edge.outp[Clip.BELOW]= edge.outp[Clip.ABOVE];
-					succ_edge.bstate[Clip.BELOW]= edge.bstate[Clip.ABOVE];
-					succ_edge.bundle[Clip.BELOW][Clip.CLIP]= edge.bundle[Clip.ABOVE][Clip.CLIP];
-					succ_edge.bundle[Clip.BELOW][Clip.SUBJ]= edge.bundle[Clip.ABOVE][Clip.SUBJ];
-					var prev_edge= edge.prev;
-					if ( prev_edge != null )
-						prev_edge.next = succ_edge;
-					else
-						aet.top_node = succ_edge;
-					if (next_edge != null)
-						next_edge.prev= succ_edge;
+					succ_edge.outp[Clip.BELOW] = edge.outp[Clip.ABOVE];
+					succ_edge.bstate[Clip.BELOW] = edge.bstate[Clip.ABOVE];
+					succ_edge.bundle[Clip.BELOW][Clip.CLIP] = edge.bundle[Clip.ABOVE][Clip.CLIP];
+					succ_edge.bundle[Clip.BELOW][Clip.SUBJ] = edge.bundle[Clip.ABOVE][Clip.SUBJ];
+					
+					var prev_edge = edge.prev;
+					if (prev_edge != null) prev_edge.next = succ_edge;
+					else aet.top_node = succ_edge;
+
+					if (next_edge != null) next_edge.prev = succ_edge;
 					succ_edge.prev = prev_edge;
 					succ_edge.next = next_edge;
-				}
-				else
-				{
+				} else {
 					/* Update this edge */
-					edge.outp[Clip.BELOW]= edge.outp[Clip.ABOVE];
-					edge.bstate[Clip.BELOW]= edge.bstate[Clip.ABOVE];
-					edge.bundle[Clip.BELOW][Clip.CLIP]= edge.bundle[Clip.ABOVE][Clip.CLIP];
-					edge.bundle[Clip.BELOW][Clip.SUBJ]= edge.bundle[Clip.ABOVE][Clip.SUBJ];
-					edge.xb= edge.xt;
+					edge.outp[Clip.BELOW] = edge.outp[Clip.ABOVE];
+					edge.bstate[Clip.BELOW] = edge.bstate[Clip.ABOVE];
+					edge.bundle[Clip.BELOW][Clip.CLIP] = edge.bundle[Clip.ABOVE][Clip.CLIP];
+					edge.bundle[Clip.BELOW][Clip.SUBJ] = edge.bundle[Clip.ABOVE][Clip.SUBJ];
+					edge.xb = edge.xt;
 				}
-				edge.outp[Clip.ABOVE]= null;
+				edge.outp[Clip.ABOVE] = null;
 			}
 		}
-	} /* === END OF SCANBEAM PROCESSING ================================== */
+	}
 
 	/* Generate result polygon from out_poly */
 	result = out_poly.getResult(polyClass);
-	//console.log("result = "+result);	
 		
-	return result ;
+	return result;
 }
 
 static.EQ = function(a, b) {
-	return (Math.abs(a - b) <= Clip.GPC_EPSILON);
+	return Math.abs(a - b) <= Clip.GPC_EPSILON;
 }
 
-static.PREV_INDEX = function( i, n) {
-	return ((i - 1+ n) % n);
+static.PREV_INDEX = function(i, n) {
+	return (i - 1+ n) % n;
 }
 
 static.NEXT_INDEX = function(i, n) {
-	return ((i + 1) % n);
+	return (i + 1) % n;
 }
 
 static.OPTIMAL = function ( p, i) {
-	return (p.getY(Clip.PREV_INDEX (i, p.getNumPoints())) != p.getY(i)) ||
-		(p.getY(Clip.NEXT_INDEX(i, p.getNumPoints())) != p.getY(i)) ;
+	return (p.getY(Clip.PREV_INDEX (i, p.getNumPoints())) != p.getY(i)) || (p.getY(Clip.NEXT_INDEX(i, p.getNumPoints())) != p.getY(i)) ;
 }
 
-static.create_contour_bboxes = function (p)
-{
-	var box= [] ;
-
+static.create_contour_bboxes = function (p) {
+	var box = [],
+		inner_poly,
+		cl = p.getNumInnerPoly(),
+		c = 0;
 	/* Construct contour bounding boxes */
-	for ( var c= 0; c < p.getNumInnerPoly(); c++)
-	{
-		var inner_poly= p.getInnerPoly(c);
+	for (; c < cl; c++) {
+		inner_poly = p.getInnerPoly(c);
 		box[c] = inner_poly.getBounds();
 	}
 	return box;
 }
 
-static.minimax_test = function ( subj, clip, op) {
-	var s_bbox= Clip.create_contour_bboxes(subj);
-	var c_bbox= Clip.create_contour_bboxes(clip);
-
-	var subj_num_poly= subj.getNumInnerPoly();
-	var clip_num_poly= clip.getNumInnerPoly();
-	var o_table = ArrayHelper.create2DArray(subj_num_poly,clip_num_poly);
+static.minimax_test = function (subj, clip, op) {
+	var s_bbox = Clip.create_contour_bboxes(subj),
+		c_bbox = Clip.create_contour_bboxes(clip),
+		subj_num_poly = subj.getNumInnerPoly(),
+		clip_num_poly = clip.getNumInnerPoly(),
+		o_table = ArrayHelper.create2DArray(subj_num_poly,clip_num_poly),
+		s, c,
+		overlap;
 
 	/* Check all subject contour bounding boxes against clip boxes */
-	for ( var s= 0; s < subj_num_poly; s++ )
-	{
-		for ( var c= 0; c < clip_num_poly ; c++ )
-		{
+	for (s=0; s < subj_num_poly; s++) {
+		for (c=0; c < clip_num_poly ; c++) {
 			o_table[s][c] =
-				(!((s_bbox[s].getMaxX() < c_bbox[c].getMinX()) ||
-					(s_bbox[s].getMinX() > c_bbox[c].getMaxX()))) &&
-					(!((s_bbox[s].getMaxY() < c_bbox[c].getMinY()) ||
-						(s_bbox[s].getMinY() > c_bbox[c].getMaxY())));
+				(!(s_bbox[s].getMaxX() < c_bbox[c].getMinX() || s_bbox[s].getMinX() > c_bbox[c].getMaxX())) &&
+					(!(s_bbox[s].getMaxY() < c_bbox[c].getMinY() || s_bbox[s].getMinY() > c_bbox[c].getMaxY()));
 		}
 	}
 
 	/* For each clip contour, search for any subject contour overlaps */
-	for ( var c= 0; c < clip_num_poly; c++ )
-	{
-		var overlap= false;
-		for ( var s= 0; !overlap && (s < subj_num_poly) ; s++)
-		{
+	for (c=0; c < clip_num_poly; c++ ) {
+		overlap = false;
+		for (s=0; !overlap && s < subj_num_poly; s++) {
 			overlap = o_table[s][c];
 		}
-		if (!overlap)
-		{
-			clip.setContributing( c, false ); // Flag non contributing status
+		if (!overlap) {
+			clip.setContributing(c, false); // Flag non contributing status
 		}
 	}
 
-	if (op == OperationType.GPC_INT)
-	{
+	if (op == OperationType.GPC_INT) {
 		/* For each subject contour, search for any clip contour overlaps */
-		for ( var s= 0; s < subj_num_poly; s++)
-		{
-			var overlap= false;
-			for ( var c= 0; !overlap && (c < clip_num_poly); c++)
-			{
+		for (s=0; s < subj_num_poly; s++) {
+			overlap = false;
+			for (c=0; !overlap && c < clip_num_poly; c++) {
 				overlap = o_table[s][c];
 			}
-			if (!overlap)
-			{
-				subj.setContributing( s, false ); // Flag non contributing status
+			if (!overlap) {
+				subj.setContributing(s, false); // Flag non contributing status
 			}
 		}
 	}
 }
 
-static.bound_list = function( lmt_table, y) {
-	if ( lmt_table.top_node == null )
-	{
+static.bound_list = function(lmt_table, y) {
+	var prev,
+		node,
+		done,
+		existing_node;
+
+	if (lmt_table.top_node == null) {
 		lmt_table.top_node = new LmtNode(y);
 		return lmt_table.top_node ;
-	}
-	else
-	{
-		var prev= null ;
-		var node= lmt_table.top_node ;
-		var done= false ;
-		while( !done )
-		{
-			if ( y < node.y )
-			{
+	} else {
+		prev = null;
+		node = lmt_table.top_node;
+		done = false;
+		while(!done) {
+			if (y < node.y) {
 				/* Insert a new LMT node before the current node */
-				var existing_node= node ;
+				existing_node = node;
 				node = new LmtNode(y);
-				node.next = existing_node ;
-				if ( prev == null )
-				{
-					lmt_table.top_node = node ;
-				}
-				else
-				{
-					prev.next = node ;
-				}
-				//               if ( existing_node == lmt_table.top_node )
-				//               {
-				//                  lmt_table.top_node = node ;
-				//               }
-				done = true ;
-			}
-			else if ( y > node.y )
-			{
+				node.next = existing_node;
+				if (prev == null) lmt_table.top_node = node;
+				else  prev.next = node;
+				done = true;
+			} else if (y > node.y) {
 				/* Head further up the LMT */
-				if ( node.next == null )
-				{
+				if (node.next == null) {
 					node.next = new LmtNode(y);
-					node = node.next ;
-					done = true ;
+					node = node.next;
+					done = true;
+				} else {
+					prev = node;
+					node = node.next;
 				}
-				else
-				{
-					prev = node ;
-					node = node.next ;
-				}
-			}
-			else
-			{
+			} else {
 				/* Use this existing LMT node */
-				done = true ;
-			}
-		}
-		return node ;
-	}
-}
-
-static.insert_bound = function ( lmt_node, e) {
-	if ( lmt_node.first_bound == null )
-{
-	/* Link node e to the tail of the list */
-	lmt_node.first_bound = e ;
-}
-else
-{
-	var done= false ;
-	var prev_bound= null ;
-	var current_bound= lmt_node.first_bound ;
-	while( !done )
-	{
-		/* Do primary sort on the x field */
-		if (e.bot.x <  current_bound.bot.x)
-		{
-			/* Insert a new node mid-list */
-			if ( prev_bound == null )
-			{
-				lmt_node.first_bound = e ;
-			}
-			else
-			{
-				prev_bound.next_bound = e ;
-			}
-			e.next_bound = current_bound ;
-
-			//               EdgeNode existing_bound = current_bound ;
-			//               current_bound = e ;
-			//               current_bound.next_bound = existing_bound ;
-			//               if ( lmt_node.first_bound == existing_bound )
-			//               {
-			//                  lmt_node.first_bound = current_bound ;
-			//               }
-			done = true ;
-		}
-		else if (e.bot.x == current_bound.bot.x)
-		{
-			/* Do secondary sort on the dx field */
-			if (e.dx < current_bound.dx)
-			{
-				/* Insert a new node mid-list */
-				if ( prev_bound == null )
-				{
-					lmt_node.first_bound = e ;
-				}
-				else
-				{
-					prev_bound.next_bound = e ;
-				}
-				e.next_bound = current_bound ;
-				//                  EdgeNode existing_bound = current_bound ;
-				//                  current_bound = e ;
-				//                  current_bound.next_bound = existing_bound ;
-				//                  if ( lmt_node.first_bound == existing_bound )
-				//                  {
-				//                     lmt_node.first_bound = current_bound ;
-				//                  }
-				done = true ;
-			}
-			else
-			{
-				/* Head further down the list */
-				if ( current_bound.next_bound == null )
-				{
-					current_bound.next_bound = e ;
-					done = true ;
-				}
-				else
-				{
-					prev_bound = current_bound ;
-					current_bound = current_bound.next_bound ;
-				}
-			}
-		}
-		else
-		{
-			/* Head further down the list */
-			if ( current_bound.next_bound == null )
-			{
-				current_bound.next_bound = e ;
-				done = true ;
-			}
-			else
-			{
-				prev_bound = current_bound ;
-				current_bound = current_bound.next_bound ;
-			}
-		}
-	}
-}
-}
-
-static.add_edge_to_aet = function ( aet, edge) {
-	if ( aet.top_node == null )
-{
-	/* Append edge onto the tail end of the AET */
-	aet.top_node = edge;
-	edge.prev = null ;
-	edge.next= null;
-}
-else
-{
-	var current_edge= aet.top_node ;
-	var prev= null ;
-	var done= false ;
-	while( !done )
-	{
-		/* Do primary sort on the xb field */
-		if (edge.xb < current_edge.xb)
-		{
-			/* Insert edge here (before the AET edge) */
-			edge.prev= prev;
-			edge.next= current_edge ;
-			current_edge.prev = edge ;
-			if ( prev == null )
-			{
-				aet.top_node = edge ;
-			}
-			else
-			{
-				prev.next = edge ;
-			}
-			//               if ( current_edge == aet.top_node )
-			//               {
-			//                  aet.top_node = edge ;
-			//               }
-			//               current_edge = edge ;
-			done = true;
-		}
-		else if (edge.xb == current_edge.xb)
-		{
-			/* Do secondary sort on the dx field */
-			if (edge.dx < current_edge.dx)
-			{
-				/* Insert edge here (before the AET edge) */
-				edge.prev= prev;
-				edge.next= current_edge ;
-				current_edge.prev = edge ;
-				if ( prev == null )
-				{
-					aet.top_node = edge ;
-				}
-				else
-				{
-					prev.next = edge ;
-				}
-				//                  if ( current_edge == aet.top_node )
-				//                  {
-				//                     aet.top_node = edge ;
-				//                  }
-				//                  current_edge = edge ;
 				done = true;
 			}
-			else
-			{
-				/* Head further into the AET */
-				prev = current_edge ;
-				if ( current_edge.next == null )
-				{
-					current_edge.next = edge ;
-					edge.prev = current_edge ;
-					edge.next = null ;
-					done = true ;
-				}
-				else
-				{
-					current_edge = current_edge.next ;
-				}
-			}
 		}
-		else
-		{
-			/* Head further into the AET */
-			prev = current_edge ;
-			if ( current_edge.next == null )
-			{
-				current_edge.next = edge ;
-				edge.prev = current_edge ;
-				edge.next = null ;
-				done = true ;
-			}
-			else
-			{
-				current_edge = current_edge.next ;
+		return node;
+	}
+}
+
+static.insert_bound = function (lmt_node, e) {
+	var done,
+		prev_bound,
+		current_bound;
+
+	if (lmt_node.first_bound == null) {
+		/* Link node e to the tail of the list */
+		lmt_node.first_bound = e;
+	} else {
+		done = false;
+		prev_bound = null;
+		current_bound = lmt_node.first_bound;
+		while(!done) {
+			/* Do primary sort on the x field */
+			if (e.bot.x < current_bound.bot.x) {
+				/* Insert a new node mid-list */
+				if (prev_bound == null) {
+					lmt_node.first_bound = e;
+				} else {
+					prev_bound.next_bound = e;
+				}
+				e.next_bound = current_bound;
+				done = true;
+			} else if (e.bot.x == current_bound.bot.x) {
+				/* Do secondary sort on the dx field */
+				if (e.dx < current_bound.dx) {
+					/* Insert a new node mid-list */
+					if (prev_bound == null) {
+						lmt_node.first_bound = e;
+					} else {
+						prev_bound.next_bound = e;
+					}
+					e.next_bound = current_bound;
+					done = true;
+				} else {
+					/* Head further down the list */
+					if (current_bound.next_bound == null) {
+						current_bound.next_bound = e;
+						done = true;
+					} else {
+						prev_bound = current_bound;
+						current_bound = current_bound.next_bound;
+					}
+				}
+			} else {
+				/* Head further down the list */
+				if (current_bound.next_bound == null) {
+					current_bound.next_bound = e;
+					done = true;
+				} else {
+					prev_bound = current_bound;
+					current_bound = current_bound.next_bound;
+				}
 			}
 		}
 	}
 }
+
+static.add_edge_to_aet = function (aet, edge) {
+	var current_edge,
+		prev,
+		done;
+
+	if (aet.top_node == null) {
+		/* Append edge onto the tail end of the AET */
+		aet.top_node = edge;
+		edge.prev = null ;
+		edge.next = null;
+	} else {
+		current_edge = aet.top_node;
+		prev = null;
+		done = false;
+		while (!done) {
+			/* Do primary sort on the xb field */
+			if (edge.xb < current_edge.xb) {
+				/* Insert edge here (before the AET edge) */
+				edge.prev = prev;
+				edge.next = current_edge;
+				current_edge.prev = edge;
+
+				if (prev == null) aet.top_node = edge;
+				else prev.next = edge;
+				
+				done = true;
+			} else if (edge.xb == current_edge.xb) {
+				/* Do secondary sort on the dx field */
+				if (edge.dx < current_edge.dx) {
+					/* Insert edge here (before the AET edge) */
+					edge.prev = prev;
+					edge.next = current_edge;
+					current_edge.prev = edge;
+					
+					if (prev == null) aet.top_node = edge;
+					else prev.next = edge;
+					
+					done = true;
+				} else {
+					/* Head further into the AET */
+					prev = current_edge;
+					if (current_edge.next == null) {
+						current_edge.next = edge;
+						edge.prev = current_edge;
+						edge.next = null;
+						done = true;
+					} else {
+						current_edge = current_edge.next ;
+					}
+				}
+			} else {
+				/* Head further into the AET */
+				prev = current_edge;
+				if (current_edge.next == null) {
+					current_edge.next = edge;
+					edge.prev = current_edge;
+					edge.next = null;
+					done = true;
+				} else {
+					current_edge = current_edge.next;
+				}
+			}
+		}
+	}
 }
 
-static.add_to_sbtree = function ( sbte, y) {
-	if ( sbte.sb_tree == null )
-		{
-			/* Add a new tree node here */
-			sbte.sb_tree = new ScanBeamTree( y );
-			sbte.sbt_entries++ ;
-			return ;
-		}
-	var tree_node= sbte.sb_tree ;
-	var done= false ;
-	while( !done )
-	{
-		if ( tree_node.y > y)
-		{
-			if ( tree_node.less == null )
-			{
+static.add_to_sbtree = function (sbte, y) {
+	var tree_node,
+		done;
+	if (sbte.sb_tree == null) {
+		/* Add a new tree node here */
+		sbte.sb_tree = new ScanBeamTree(y);
+		sbte.sbt_entries++;
+		return;
+	}
+	tree_node = sbte.sb_tree;
+	done = false;
+	while (!done) {
+		if (tree_node.y > y) {
+			if (tree_node.less == null) {
 				tree_node.less = new ScanBeamTree(y);
-				sbte.sbt_entries++ ;
-				done = true ;
+				sbte.sbt_entries++;
+				done = true;
+			} else {
+				tree_node = tree_node.less;
 			}
-			else
-			{
-				tree_node = tree_node.less ;
-			}
-		}
-		else if ( tree_node.y < y)
-		{
-			if ( tree_node.more == null )
-			{
+		} else if (tree_node.y < y) {
+			if (tree_node.more == null) {
 				tree_node.more = new ScanBeamTree(y);
-				sbte.sbt_entries++ ;
-				done = true ;
+				sbte.sbt_entries++;
+				done = true;
+			} else {
+				tree_node = tree_node.more;
 			}
-			else
-			{
-				tree_node = tree_node.more ;
-			}
-		}
-		else
-		{
-			done = true ;
+		} else {
+			done = true;
 		}
 	}
 }
