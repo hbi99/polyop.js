@@ -1033,228 +1033,191 @@ static.add_to_sbtree = function (sbte, y) {
 }
 
 
-static.build_lmt = function( lmt_table, 
-							sbte,
-							p, 
-							type, //poly type SUBJ/Clip.CLIP
-							op) {
-			/* Create the entire input polygon edge table in one go */
-			var edge_table= new EdgeTable();
-			
-			for ( var c= 0; c < p.getNumInnerPoly(); c++)
-			{
-				var ip= p.getInnerPoly(c);
-				if ( !ip.isContributing(0) )
-				{
-					/* Ignore the non-contributing contour */
-					ip.setContributing(0, true);
-				}
-				else
-				{
+static.build_lmt = function(lmt_table, sbte, p, type, op) {
+	/* Create the entire input polygon edge table in one go */
+	var edge_table = new EdgeTable(),
+		c, cl,
+		ip,
+		num_vertices,
+		num_edges,
+		e_index,
+		max,
+		min,
+		x, y,
+		v, e, ev, ei,
+		i;
+	
+	for (c=0; c < p.getNumInnerPoly(); c++) {
+		ip = p.getInnerPoly(c);
+		if (!ip.isContributing(0)) {
+			/* Ignore the non-contributing contour */
+			ip.setContributing(0, true);
+		} else {
+			/* Perform contour optimisation */
+			num_vertices = 0;
+			e_index = 0;
+			edge_table = new EdgeTable();
+			for ( var i=0; i<ip.getNumPoints(); i++) {
+				if (Clip.OPTIMAL(ip, i)) {
+					x = ip.getX(i);
+					y = ip.getY(i);
+					edge_table.addNode( x, y );
 					
+					/* Record vertex in the scanbeam table */
+					Clip.add_to_sbtree( sbte, ip.getY(i) );
 					
-					/* Perform contour optimisation */
-					var num_vertices= 0;
-					var e_index= 0;
-					edge_table = new EdgeTable();
-					for ( var i= 0; i < ip.getNumPoints(); i++)
-					{
-						if ( Clip.OPTIMAL(ip, i) )
-						{
-							var x= ip.getX(i);
-							var y= ip.getY(i);
-							edge_table.addNode( x, y );
-							
-							/* Record vertex in the scanbeam table */
-							Clip.add_to_sbtree( sbte, ip.getY(i) );
-							
-							num_vertices++;
-						}
-					}
-					
-					/* Do the contour forward pass */
-					
-					for ( var min= 0; min < num_vertices; min++)
-					{
-						/* If a forward local minimum... */
-						if ( edge_table.FWD_MIN( min ) )
-						{
-							/* Search for the next local maximum... */
-							var num_edges= 1;
-							var max= Clip.NEXT_INDEX( min, num_vertices );
-							while( edge_table.NOT_FMAX( max ) )
-							{
-								num_edges++;
-								max = Clip.NEXT_INDEX( max, num_vertices );
-							}
-							
-							/* Build the next edge list */
-							var v= min;
-							var e= edge_table.getNode( e_index );
-							e.bstate[Clip.BELOW] = BundleState.UNBUNDLED;
-							e.bundle[Clip.BELOW][Clip.CLIP] = 0;
-							e.bundle[Clip.BELOW][Clip.SUBJ] = 0;
-							
-							for ( var i= 0; i < num_edges; i++)
-							{
-								var ei= edge_table.getNode( e_index+i );
-								var ev= edge_table.getNode( v );
-								
-								ei.xb    = ev.vertex.x;
-								ei.bot.x = ev.vertex.x;
-								ei.bot.y = ev.vertex.y;
-								
-								v = Clip.NEXT_INDEX(v, num_vertices);
-								ev = edge_table.getNode( v );
-								
-								ei.top.x= ev.vertex.x;
-								ei.top.y= ev.vertex.y;
-								ei.dx= (ev.vertex.x - ei.bot.x) / (ei.top.y - ei.bot.y);
-								ei.type = type;
-								ei.outp[Clip.ABOVE] = null ;
-								ei.outp[Clip.BELOW] = null;
-								ei.next = null;
-								ei.prev = null;
-								ei.succ = ((num_edges > 1) && (i < (num_edges - 1))) ? edge_table.getNode(e_index+i+1) : null;
-								ei.pred = ((num_edges > 1) && (i > 0)) ? edge_table.getNode(e_index+i-1) : null ;
-								ei.next_bound = null ;
-								ei.bside[Clip.CLIP] = (op == OperationType.GPC_DIFF) ? Clip.RIGHT : Clip.LEFT;
-								ei.bside[Clip.SUBJ] = Clip.LEFT ;
-							}
-							Clip.insert_bound( Clip.bound_list(lmt_table, edge_table.getNode(min).vertex.y), e);
-							if ( Clip.DEBUG )
-							{
-								//console.log("fwd");
-								lmt_table.print();
-							}
-							e_index += num_edges;
-						}
-					}
-					
-					/* Do the contour reverse pass */
-					for ( var min= 0; min < num_vertices; min++)
-					{
-						/* If a reverse local minimum... */
-						if ( edge_table.REV_MIN( min ) )
-						{
-							/* Search for the previous local maximum... */
-							var num_edges= 1;
-							var max= Clip.PREV_INDEX(min, num_vertices);
-							while( edge_table.NOT_RMAX( max ) )
-							{
-								num_edges++;
-								max = Clip.PREV_INDEX(max, num_vertices);
-							}
-							
-							/* Build the previous edge list */
-							var v= min;
-							var e= edge_table.getNode( e_index );
-							e.bstate[Clip.BELOW] = BundleState.UNBUNDLED;
-							e.bundle[Clip.BELOW][Clip.CLIP] = 0;
-							e.bundle[Clip.BELOW][Clip.SUBJ] = 0;
-							
-							for (var i= 0; i < num_edges; i++)
-							{
-								var ei= edge_table.getNode( e_index+i );
-								var ev= edge_table.getNode( v );
-								
-								ei.xb    = ev.vertex.x;
-								ei.bot.x = ev.vertex.x;
-								ei.bot.y = ev.vertex.y;
-								
-								v= Clip.PREV_INDEX(v, num_vertices);
-								ev = edge_table.getNode( v );
-								
-								ei.top.x = ev.vertex.x;
-								ei.top.y = ev.vertex.y;
-								ei.dx = (ev.vertex.x - ei.bot.x) / (ei.top.y - ei.bot.y);
-								ei.type = type;
-								ei.outp[Clip.ABOVE] = null;
-								ei.outp[Clip.BELOW] = null;
-								ei.next = null ;
-								ei.prev = null;
-								ei.succ = ((num_edges > 1) && (i < (num_edges - 1))) ? edge_table.getNode(e_index+i+1) : null;
-								ei.pred = ((num_edges > 1) && (i > 0)) ? edge_table.getNode(e_index+i-1) : null ;
-								ei.next_bound = null ;
-								ei.bside[Clip.CLIP] = (op == OperationType.GPC_DIFF) ? Clip.RIGHT : Clip.LEFT;
-								ei.bside[Clip.SUBJ] = Clip.LEFT;
-							}
-							Clip.insert_bound( Clip.bound_list(lmt_table, edge_table.getNode(min).vertex.y), e);
-							if ( Clip.DEBUG )
-							{
-								//console.log("rev");
-								lmt_table.print();
-							}
-							e_index+= num_edges;
-						}
-					}
+					num_vertices++;
 				}
 			}
-			return edge_table;
+			
+			/* Do the contour forward pass */
+			for (var min= 0; min < num_vertices; min++) {
+				/* If a forward local minimum... */
+				if (edge_table.FWD_MIN(min)) {
+					/* Search for the next local maximum... */
+					num_edges = 1;
+					max = Clip.NEXT_INDEX(min, num_vertices);
+					while (edge_table.NOT_FMAX(max)) {
+						num_edges++;
+						max = Clip.NEXT_INDEX(max, num_vertices);
+					}
+					
+					/* Build the next edge list */
+					v = min;
+					e = edge_table.getNode(e_index);
+					e.bstate[Clip.BELOW] = BundleState.UNBUNDLED;
+					e.bundle[Clip.BELOW][Clip.CLIP] = 0;
+					e.bundle[Clip.BELOW][Clip.SUBJ] = 0;
+					
+					for (i=0; i<num_edges; i++) {
+						ei = edge_table.getNode(e_index+i);
+						ev = edge_table.getNode(v);
+						
+						ei.xb    = ev.vertex.x;
+						ei.bot.x = ev.vertex.x;
+						ei.bot.y = ev.vertex.y;
+						
+						v = Clip.NEXT_INDEX(v, num_vertices);
+						ev = edge_table.getNode(v);
+						
+						ei.top.x = ev.vertex.x;
+						ei.top.y = ev.vertex.y;
+						ei.dx = (ev.vertex.x - ei.bot.x) / (ei.top.y - ei.bot.y);
+						ei.type = type;
+						ei.outp[Clip.ABOVE] = null;
+						ei.outp[Clip.BELOW] = null;
+						ei.next = null;
+						ei.prev = null;
+						ei.succ = (num_edges > 1 && i < (num_edges - 1)) ? edge_table.getNode(e_index + i + 1) : null;
+						ei.pred = (num_edges > 1 && i > 0) ? edge_table.getNode(e_index + i - 1) : null;
+						ei.next_bound = null;
+						ei.bside[Clip.CLIP] = (op == OperationType.GPC_DIFF) ? Clip.RIGHT : Clip.LEFT;
+						ei.bside[Clip.SUBJ] = Clip.LEFT;
+					}
+					Clip.insert_bound( Clip.bound_list(lmt_table, edge_table.getNode(min).vertex.y), e);
+					e_index += num_edges;
+				}
+			}
+			
+			/* Do the contour reverse pass */
+			for (min=0; min<num_vertices; min++) {
+				/* If a reverse local minimum... */
+				if (edge_table.REV_MIN(min)) {
+					/* Search for the previous local maximum... */
+					num_edges = 1;
+					max = Clip.PREV_INDEX(min, num_vertices);
+					while (edge_table.NOT_RMAX(max)) {
+						num_edges++;
+						max = Clip.PREV_INDEX(max, num_vertices);
+					}
+					
+					/* Build the previous edge list */
+					v = min;
+					e = edge_table.getNode(e_index);
+					e.bstate[Clip.BELOW] = BundleState.UNBUNDLED;
+					e.bundle[Clip.BELOW][Clip.CLIP] = 0;
+					e.bundle[Clip.BELOW][Clip.SUBJ] = 0;
+					
+					for (i=0; i<num_edges; i++) {
+						ei = edge_table.getNode(e_index+i);
+						ev = edge_table.getNode(v);
+						
+						ei.xb    = ev.vertex.x;
+						ei.bot.x = ev.vertex.x;
+						ei.bot.y = ev.vertex.y;
+						
+						v = Clip.PREV_INDEX(v, num_vertices);
+						ev = edge_table.getNode(v);
+						
+						ei.top.x = ev.vertex.x;
+						ei.top.y = ev.vertex.y;
+						ei.dx = (ev.vertex.x - ei.bot.x) / (ei.top.y - ei.bot.y);
+						ei.type = type;
+						ei.outp[Clip.ABOVE] = null;
+						ei.outp[Clip.BELOW] = null;
+						ei.next = null;
+						ei.prev = null;
+						ei.succ = (num_edges > 1 && i < (num_edges - 1)) ? edge_table.getNode(e_index + i + 1) : null;
+						ei.pred = (num_edges > 1 && i > 0) ? edge_table.getNode(e_index + i - 1) : null;
+						ei.next_bound = null;
+						ei.bside[Clip.CLIP] = (op == OperationType.GPC_DIFF) ? Clip.RIGHT : Clip.LEFT;
+						ei.bside[Clip.SUBJ] = Clip.LEFT;
+					}
+					Clip.insert_bound(Clip.bound_list(lmt_table, edge_table.getNode(min).vertex.y), e);
+					e_index += num_edges;
+				}
+			}
 		}
-
-
-static.add_st_edge = function( st, it, edge, dy) {
-	if (st == null)
-	{
-		/* Append edge onto the tail end of the ST */
-		st = new StNode( edge, null );
 	}
-	else
-	{
-		var den= (st.xt - st.xb) - (edge.xt - edge.xb);
+	return edge_table;
+}
 
+
+static.add_st_edge = function(st, it, edge, dy) {
+	var den,
+		existing_node,
+		r, x, y;
+	if (st == null) {
+		/* Append edge onto the tail end of the ST */
+		st = new StNode(edge, null);
+	} else {
+		den = (st.xt - st.xb) - (edge.xt - edge.xb);
 		/* If new edge and ST edge don't cross */
-		if ( (edge.xt >= st.xt) || (edge.dx == st.dx) || (Math.abs(den) <= Clip.GPC_EPSILON))
-		{
+		if (edge.xt >= st.xt || edge.dx == st.dx || Math.abs(den) <= Clip.GPC_EPSILON) {
 			/* No intersection - insert edge here (before the ST edge) */
-			var existing_node= st;
-			st = new StNode( edge, existing_node );
-		}
-		else
-		{
+			existing_node = st;
+			st = new StNode(edge, existing_node);
+		} else {
 			/* Compute intersection between new edge and ST edge */
-			var r= (edge.xb - st.xb) / den;
-			var x= st.xb + r * (st.xt - st.xb);
-			var y= r * dy;
-
+			r = (edge.xb - st.xb) / den;
+			x = st.xb + r * (st.xt - st.xb);
+			y = r * dy;
 			/* Insert the edge pointers and the intersection point in the IT */
 			it.top_node = Clip.add_intersection(it.top_node, st.edge, edge, x, y);
-
 			/* Head further into the ST */
 			st.prev = Clip.add_st_edge(st.prev, it, edge, dy);
 		}
 	}
-	return st ;
+	return st;
 }
 
 
-
-static.add_intersection = function ( it_node,
-	edge0,
-	edge1,
-	x,
-	y) {
-	if (it_node == null)
-	{
+static.add_intersection = function (it_node, edge0, edge1, x, y) {
+	var existing_node;
+	if (it_node == null) {
 		/* Append a new node to the tail of the list */
-		it_node = new ItNode( edge0, edge1, x, y, null );
-	}
-	else
-	{
-		if ( it_node.point.y > y)
-		{
+		it_node = new ItNode(edge0, edge1, x, y, null);
+	} else {
+		if (it_node.point.y > y) {
 			/* Insert a new node mid-list */
-			var existing_node= it_node ;
-			it_node = new ItNode( edge0, edge1, x, y, existing_node );
-		}
-		else
-		{
+			existing_node = it_node;
+			it_node = new ItNode(edge0, edge1, x, y, existing_node);
+		} else {
 			/* Head further down the list */
 			it_node.next = Clip.add_intersection( it_node.next, edge0, edge1, x, y);
 		}
 	}
-	return it_node ;
+	return it_node;
 }
 
 
@@ -1263,9 +1226,8 @@ gpcas.geometry.AetTree = function() {
 	this.top_node = null; //EdgeNode
 };
 gpcas.geometry.AetTree.prototype.print = function() {
-	//console.log("aet");
-	for ( var edge= this.top_node ; (edge != null) ; edge = edge.next ) {
-		//console.log("edge.vertex.x="+edge.vertex.x+"  edge.vertex.y="+edge.vertex.y);
+	for (var edge = this.top_node; edge != null; edge = edge.next) {
+		//console.log('edge.vertex.x='+ edge.vertex.x +'  edge.vertex.y=' +edge.vertex.y);
 	}
 }
 
@@ -1274,31 +1236,31 @@ gpcas.geometry.AetTree.prototype.print = function() {
 gpcas.geometry.BundleState = function(state) {
 	this.m_State = state ; //String
 };
-gpcas.geometry.BundleState.UNBUNDLED = new gpcas.geometry.BundleState("UNBUNDLED");
-gpcas.geometry.BundleState.BUNDLE_HEAD = new gpcas.geometry.BundleState("BUNDLE_HEAD");
-gpcas.geometry.BundleState.BUNDLE_TAIL = new gpcas.geometry.BundleState("BUNDLE_TAIL");
+gpcas.geometry.BundleState.UNBUNDLED = new gpcas.geometry.BundleState('UNBUNDLED');
+gpcas.geometry.BundleState.BUNDLE_HEAD = new gpcas.geometry.BundleState('BUNDLE_HEAD');
+gpcas.geometry.BundleState.BUNDLE_TAIL = new gpcas.geometry.BundleState('BUNDLE_TAIL');
 gpcas.geometry.BundleState.prototype.toString = function() {
 	return this.m_State;
 };
 
 /////////////// EdgeNode ////////////////////////////
 gpcas.geometry.EdgeNode = function() {
-	this.vertex= new Point(); /* Piggy-backed contour vertex data  */
-	this.bot= new Point(); /* Edge lower (x, y) coordinate      */
-	this.top= new Point(); /* Edge upper (x, y) coordinate      */
-	this.xb;           /* Scanbeam bottom x coordinate      */
-	this.xt;           /* Scanbeam top x coordinate         */
-	this.dx;           /* Change in x for a unit y increase */
-	this.type;         /* Clip / subject edge flag          */
-	this.bundle = ArrayHelper.create2DArray(2,2);      /* Bundle edge flags                 */
-	this.bside= [];         /* Bundle left / right indicators    */
-	this.bstate= []; /* Edge bundle state                 */
-	this.outp= []; /* Output polygon / tristrip pointer */
-	this.prev;         /* Previous edge in the AET          */
-	this.next;         /* Next edge in the AET              */
-	this.pred;         /* Edge connected at the lower end   */
-	this.succ;         /* Edge connected at the upper end   */
-	this.next_bound;   /* Pointer to next bound in LMT      */
+	this.vertex = new Point(); /* Piggy-backed contour vertex data  */
+	this.bot = new Point();    /* Edge lower (x, y) coordinate      */
+	this.top = new Point();    /* Edge upper (x, y) coordinate      */
+	this.xb;                   /* Scanbeam bottom x coordinate      */
+	this.xt;                   /* Scanbeam top x coordinate         */
+	this.dx;                   /* Change in x for a unit y increase */
+	this.type;                 /* Clip / subject edge flag          */
+	this.bundle = ArrayHelper.create2DArray(2, 2); /* Bundle edge flags */
+	this.bside = [];           /* Bundle left / right indicators    */
+	this.bstate = [];          /* Edge bundle state                 */
+	this.outp = [];            /* Output polygon / tristrip pointer */
+	this.prev;                 /* Previous edge in the AET          */
+	this.next;                 /* Next edge in the AET              */
+	this.pred;                 /* Edge connected at the lower end   */
+	this.succ;                 /* Edge connected at the upper end   */
+	this.next_bound;           /* Pointer to next bound in LMT      */
 };
 
 
@@ -1309,48 +1271,44 @@ gpcas.geometry.EdgeNode = function() {
 gpcas.geometry.EdgeTable = function() {
 	this.m_List = new ArrayList();
 };
-gpcas.geometry.EdgeTable.prototype.addNode = function(x,y) {
-	var node= new EdgeNode();
-	node.vertex.x = x ;
-	node.vertex.y = y ;
-	this.m_List.add( node );
-	
-}
-gpcas.geometry.EdgeTable.prototype.getNode = function (index) {
-	return this.m_List.get(index);
-}
-gpcas.geometry.EdgeTable.prototype.FWD_MIN = function(i) {
-	var m_List = this.m_List;
-	
-	var prev= (m_List.get(Clip.PREV_INDEX(i, m_List.size())));
-	var next= (m_List.get(Clip.NEXT_INDEX(i, m_List.size())));
-	var ith= (m_List.get(i));
-	
-	return ((prev.vertex.y >= ith.vertex.y) &&
-				 (next.vertex.y >  ith.vertex.y));
-}	  
-gpcas.geometry.EdgeTable.prototype.NOT_FMAX = function ( i) {
-	var m_List = this.m_List;
-	
-	var next= (m_List.get(Clip.NEXT_INDEX(i, m_List.size())));
-	var ith= (m_List.get(i));
-	return(next.vertex.y > ith.vertex.y);
-}
-gpcas.geometry.EdgeTable.prototype.REV_MIN = function ( i) {
-	var m_List = this.m_List;
-	
-	var prev= (m_List.get(Clip.PREV_INDEX(i, m_List.size())));
-	var next= (m_List.get(Clip.NEXT_INDEX(i, m_List.size())));
-	var ith= (m_List.get(i));
-	return ((prev.vertex.y >  ith.vertex.y) && (next.vertex.y >= ith.vertex.y));
-}
-gpcas.geometry.EdgeTable.prototype.NOT_RMAX = function (i) {
-	var m_List = this.m_List;
-	
-	var prev= (m_List.get(Clip.PREV_INDEX(i, m_List.size())));
-	var ith= (m_List.get(i));
-	return (prev.vertex.y > ith.vertex.y) ;
-}
+
+gpcas.geometry.EdgeTable.prototype = {
+	addNode: function(x,y) {
+		var node = new EdgeNode();
+		node.vertex.x = x;
+		node.vertex.y = y;
+		this.m_List.add(node);
+	},
+	getNode: function (index) {
+		return this.m_List.get(index);
+	},
+	FWD_MIN: function(i) {
+		var m_List = this.m_List,
+			prev = m_List.get(Clip.PREV_INDEX(i, m_List.size())),
+			next = m_List.get(Clip.NEXT_INDEX(i, m_List.size())),
+			ith = m_List.get(i);
+		return (prev.vertex.y >= ith.vertex.y && next.vertex.y >  ith.vertex.y);
+	}	  ,
+	NOT_FMAX: function(i) {
+		var m_List = this.m_List,
+			next = m_List.get(Clip.NEXT_INDEX(i, m_List.size())),
+			ith = m_List.get(i);
+		return next.vertex.y > ith.vertex.y;
+	},
+	REV_MIN: function(i) {
+		var m_List = this.m_List,
+			prev = m_List.get(Clip.PREV_INDEX(i, m_List.size())),
+			next = m_List.get(Clip.NEXT_INDEX(i, m_List.size())),
+			ith = m_List.get(i);
+		return prev.vertex.y > ith.vertex.y && next.vertex.y >= ith.vertex.y;
+	},
+	NOT_RMAX: function(i) {
+		var m_List = this.m_List,
+			prev = m_List.get(Clip.PREV_INDEX(i, m_List.size())),
+			ith = m_List.get(i);
+		return prev.vertex.y > ith.vertex.y;
+	}
+};
 
 
 /////////////////////   HState   //////////////////////////////////////
@@ -1376,25 +1334,24 @@ gpcas.geometry.HState.next_h_state =
 
 	  
 ///////////////////////    	  IntersectionPoint /////////////////////////////
-gpcas.geometry.IntersectionPoint = function(p1,p2,p3) {
-	this.polygonPoint1 = p1; /* of Point */;
+gpcas.geometry.IntersectionPoint = function(p1, p2, p3) {
+	this.polygonPoint1 = p1;  /* of Point */;
 	this.polygonPoint2 = p2;  /* of Point */;
-	this.intersectionPoint = p3 ;
+	this.intersectionPoint = p3;
 };
+
 gpcas.geometry.IntersectionPoint.prototype.toString = function () {
-	return "P1 :"+polygonPoint1.toString()+" P2:"+polygonPoint2.toString()+" IP:"+intersectionPoint.toString();
+	return 'P1 :'+ polygonPoint1.toString() +' P2:'+ polygonPoint2.toString() +' IP:'+ intersectionPoint.toString();
 }
 
 
 ///////////////////////////    ItNode   ///////////////
 gpcas.geometry.ItNode = function(edge0, edge1, x, y, next) {
-	this.ie= [];     /* Intersecting edge (bundle) pair   */
-	this.point= new Point(x,y); /* Point of intersection             */
-	this.next=next;                         /* The next intersection table node  */
-	
-	this.ie[0] = edge0 ;
-	this.ie[1] = edge1 ;
-	
+	this.ie = [];                    /* Intersecting edge (bundle) pair   */
+	this.point = new Point(x,y);     /* Point of intersection             */
+	this.next = next;                /* The next intersection table node  */
+	this.ie[0] = edge0;
+	this.ie[1] = edge1;
 };
 
 
@@ -1403,19 +1360,13 @@ gpcas.geometry.ItNodeTable = function() {
 	this.top_node;
 }
 gpcas.geometry.ItNodeTable.prototype.build_intersection_table = function (aet, dy) {
-	var st= null ;
-	 
+	var st = null,
+		edge;
 	/* Process each AET edge */
-	for (var edge= aet.top_node ; (edge != null); edge = edge.next)
-	{
-		if ( (edge.bstate[Clip.ABOVE] == BundleState.BUNDLE_HEAD) ||
-				(edge.bundle[Clip.ABOVE][Clip.CLIP] != 0) ||
-				(edge.bundle[Clip.ABOVE][Clip.SUBJ] != 0) )
-		{
+	for (edge=aet.top_node; edge != null; edge = edge.next) {
+		if (edge.bstate[Clip.ABOVE] == BundleState.BUNDLE_HEAD || edge.bundle[Clip.ABOVE][Clip.CLIP] != 0 || edge.bundle[Clip.ABOVE][Clip.SUBJ] != 0) {
 			st = Clip.add_st_edge(st, this, edge, dy);
 		}
-		
-		
 	}
 }
 
@@ -1427,70 +1378,81 @@ gpcas.geometry.Line = function() {
 
 ////////////   LineHelper /////////////////////
 
-gpcas.geometry.LineHelper = function() {};
-gpcas.geometry.LineHelper.equalPoint = function (p1,p2) {
-	return ((p1[0]==p2[0]) && (p1[1]==p2[1]));
+gpcas.geometry.LineHelper = function() {
+
+};
+
+gpcas.geometry.LineHelper.equalPoint = function (p1, p2) {
+	return p1[0] == p2[0] && p1[1] == p2[1];
 }
-gpcas.geometry.LineHelper.equalVertex = function(s1,e1,s2,e2) {
-	return (
-		((gpcas.geometry.LineHelper.equalPoint(s1,s2)) && (gpcas.geometry.LineHelper.equalPoint(e1,e2)))
-		||
-		((gpcas.geometry.LineHelper.equalPoint(s1,e2)) && (gpcas.geometry.LineHelper.equalPoint(e1,s2)))
-		);
+
+gpcas.geometry.LineHelper.equalVertex = function(s1, e1, s2, e2) {
+	return (gpcas.geometry.LineHelper.equalPoint(s1, s2) && gpcas.geometry.LineHelper.equalPoint(e1, e2)) ||
+			(gpcas.geometry.LineHelper.equalPoint(s1, e2) && gpcas.geometry.LineHelper.equalPoint(e1, s2));
 }
+
 gpcas.geometry.LineHelper.distancePoints = function(p1, p2) {
-	return Math.sqrt((p2[0]-p1[0])*(p2[0]-p1[0]) + (p2[1]-p1[1])*(p2[1]-p1[1]));  
+	return Math.sqrt((p2[0] - p1[0]) * (p2[0] - p1[0]) + (p2[1] - p1[1]) * (p2[1] - p1[1]));  
 }
+
 gpcas.geometry.LineHelper.clonePoint = function(p) {
-	return [p[0],p[1]];
+	return [p[0], p[1]];
 }
+
 gpcas.geometry.LineHelper.cloneLine = function(line) {
-	var res  = [];
-	for (var i = 0; i<line.length; i++) {
-		res[i]=[line[i][0],line[i][1]];
+	var res  = [],
+		il = line.length,
+		i = 0;
+	for (; i<il; i++) {
+		res[i] = [line[i][0], line[i][1]];
 	}
 	return res;
 }
-gpcas.geometry.LineHelper.addLineToLine = function(line1,line2) {
-	for (var i = 0; i<line2.length; i++) {
+
+gpcas.geometry.LineHelper.addLineToLine = function(line1, line2) {
+	var il = line2.length,
+		i = 0;
+	for (; i<il; i++) {
 		line1.push(clonePoint(line2[i]));
 	}
 }
+
 gpcas.geometry.LineHelper.roundPoint = function(p) {
-	p[0]=Math.round(p[0]);
-	p[1]=Math.round(p[1]);
+	p[0] = Math.round(p[0]);
+	p[1] = Math.round(p[1]);
 }
+
 //---------------------------------------------------------------
 //Checks for intersection of Segment if as_seg is true.
 //Checks for intersection of Line if as_seg is false.
 //Return intersection of Segment "AB" and Segment "EF" as a Point
 //Return null if there is no intersection
 //---------------------------------------------------------------
-gpcas.geometry.LineHelper.lineIntersectLine = function(A,B,E,F,as_seg)
-{
+gpcas.geometry.LineHelper.lineIntersectLine = function(A, B, E, F, as_seg) {
+	var denom,
+		ip,
+		a1,
+		a2,
+		b1,
+		b2,
+		c1,
+		c2;
+
 	if (as_seg == null) as_seg = true;
-	var ip;
-	var a1;
-	var a2;
-	var b1;
-	var b2;
-	var c1;
-	var c2;
  
-	a1= B.y-A.y;
-	b1= A.x-B.x;
-	c1= B.x*A.y - A.x*B.y;
-	a2= F.y-E.y;
-	b2= E.x-F.x;
-	c2= F.x*E.y - E.x*F.y;
+	a1 = B.y - A.y;
+	b1 = A.x - B.x;
+	c1 = B.x * A.y - A.x * B.y;
+	a2 = F.y - E.y;
+	b2 = E.x - F.x;
+	c2 = F.x * E.y - E.x * F.y;
  
-	var denom=a1*b2 - a2*b1;
-	if (denom == 0) {
-		return null;
-	}
-	ip=new Point();
-	ip.x=(b1*c2 - b2*c1)/denom;
-	ip.y=(a2*c1 - a1*c2)/denom;
+	denom = a1 * b2 - a2 * b1;
+	if (denom == 0) return null;
+	
+	ip = new Point();
+	ip.x = (b1 * c2 - b2 * c1) / denom;
+	ip.y = (a2 * c1 - a1 * c2) / denom;
  
 	//---------------------------------------------------
 	//Do checks to see if intersection to endpoints
@@ -1498,55 +1460,45 @@ gpcas.geometry.LineHelper.lineIntersectLine = function(A,B,E,F,as_seg)
 	//Return null if it is with any.
 	//---------------------------------------------------
 	if (as_seg) {
-		if (Math.pow((ip.x - B.x) + (ip.y - B.y), 2) > Math.pow((A.x - B.x) + (A.y - B.y), 2)) {
-			return null;
-		}
-		if (Math.pow((ip.x - A.x) + (ip.y - A.y), 2) > Math.pow((A.x - B.x) + (A.y - B.y), 2)) {
-			return null;
-		}	
- 
-		if (Math.pow((ip.x - F.x) + (ip.y - F.y), 2) > Math.pow((E.x - F.x) + (E.y - F.y), 2)) {
-			return null;
-		}
-		if (Math.pow((ip.x - E.x) + (ip.y - E.y), 2) > Math.pow((E.x - F.x) + (E.y - F.y), 2)) {
-			return null;
-		}
+		if (Math.pow((ip.x - B.x) + (ip.y - B.y), 2) > Math.pow((A.x - B.x) + (A.y - B.y), 2)) return null;
+		if (Math.pow((ip.x - A.x) + (ip.y - A.y), 2) > Math.pow((A.x - B.x) + (A.y - B.y), 2)) return null;
+		if (Math.pow((ip.x - F.x) + (ip.y - F.y), 2) > Math.pow((E.x - F.x) + (E.y - F.y), 2)) return null;
+		if (Math.pow((ip.x - E.x) + (ip.y - E.y), 2) > Math.pow((E.x - F.x) + (E.y - F.y), 2)) return null;
 	}
-	return new Point(Math.round(ip.x),Math.round(ip.y));
+	return new Point(Math.round(ip.x), Math.round(ip.y));
 }
 
 
 //////////////  LineIntersection  ///////////////////////
-gpcas.geometry.LineIntersection = function() {};
+gpcas.geometry.LineIntersection = function() {
+
+};
+
 gpcas.geometry.LineIntersection.iteratePoints = function(points, s1, s2,e1,e2) {
-	var direction=true;
-	var pl = points.length;
-	var s1Ind = points.indexOf(s1);
-	var s2Ind = points.indexOf(s2);
-	var start = s1Ind;
+	var direction = true,
+		pl = points.length,
+		s1Ind = points.indexOf(s1),
+		s2Ind = points.indexOf(s2),
+		start = s1Ind,
+		newPoints = [],
+		point,
+		i;
 	
-	if (s2Ind>s1Ind) direction=false;
-	var newPoints  = [];
-	var point  ;
+	if (s2Ind > s1Ind) direction = false;
 	
 	if (direction) {
-		for (var i =0; i<pl; i++) {
-			point=(i+start<pl)?points[i+start]:points[i+start-pl];
+		for (i=0; i<pl; i++) {
+			point = (i + start < pl) ? points[i + start] : points[i + start - pl];
 			newPoints.push(point);
-			if ((equals(point, e1)) || (equals(point, e2))) {
-				break;
-			}
+			if (equals(point, e1) || equals(point, e2)) break;
 		}
 	} else {
-		for (var i =pl; i>=0; i--) {
-			point=(i+start<pl)?points[i+start]:points[i+start-pl];
+		for (i=pl; i>=0; i--) {
+			point = (i + start < pl) ? points[i + start] : points[i + start - pl];
 			newPoints.push(point);
-			if ((equals(point, e1)) || (equals(point, e2))) {
-				break;
-			}
+			if (equals(point, e1) || equals(point, e2)) break;
 		}	
 	}
-			
 	return newPoints;			
 }
 
