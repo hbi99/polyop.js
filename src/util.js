@@ -1,11 +1,16 @@
 
+// Point
+function Point(x, y) {
+	this.x = x;
+	this.y = y;
+};
+
 //Object.prototype.equals = function(x) {
 function equals(x1, x) {
 	var p;
 	for (p in x1) {
 		if (typeof(x[p]) === 'undefined') return false;
 	}
-
 	for (p in x1) {
 		if (x1[p]) {
 			switch(typeof(x1[p])) {
@@ -27,12 +32,6 @@ function equals(x1, x) {
 	}
 	return true;
 }
-
-///point
-var Point = function(x, y) {
-	this.x = x;
-	this.y = y;
-};
 
 ////////////// CLASS ArrayHelper ////////////////////////////////////
 

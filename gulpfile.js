@@ -52,7 +52,7 @@ gulp.task('styles:demo', function() {
 gulp.task('scripts', function() {
 	return gulp.src(srcPaths.script[1])
 		.pipe($.fileInclude(include_options))
-		.pipe($.uglify())
+	//	.pipe($.uglify())
 		.pipe($.rename({suffix: '.min'}))
 		.pipe(gulp.dest(destPaths.script[0]))
 		.pipe($.size({title: 'scripts'}));
