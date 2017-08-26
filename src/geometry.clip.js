@@ -1,20 +1,17 @@
 
-GEOMETRY.Clip = function() {
-
+GEOMETRY.Clip = {
+	DEBUG: false,
+	GPC_EPSILON: 2.2204460492503131e-016,
+	GPC_VERSION: '2.31',
+	LEFT: 0,
+	RIGHT: 1,
+	ABOVE: 0,
+	BELOW: 1,
+	CLIP: 0,
+	SUBJ: 1
 };
-GEOMETRY.Clip.DEBUG = false;
-GEOMETRY.Clip.GPC_EPSILON = 2.2204460492503131e-016;
-GEOMETRY.Clip.GPC_VERSION = '2.31';
-GEOMETRY.Clip.LEFT = 0;
-GEOMETRY.Clip.RIGHT = 1;
-GEOMETRY.Clip.ABOVE = 0;
-GEOMETRY.Clip.BELOW = 1;
-GEOMETRY.Clip.CLIP = 0;
-GEOMETRY.Clip.SUBJ = 1;
 
 
-
-//var p = GEOMETRY.Clip.prototype;
 var static = GEOMETRY.Clip;
 
 // ----------------------
@@ -33,7 +30,7 @@ var static = GEOMETRY.Clip;
 
 static.intersection = function(p1, p2, polyClass) {
 	if (polyClass == null || polyClass == undefined) polyClass = 'PolyDefault';
-	return Clip.clip( OperationType.GPC_INT, p1, p2, polyClass );
+	return Clip.clip(OperationType.GPC_INT, p1, p2, polyClass);
 };
 
 
@@ -49,7 +46,7 @@ static.intersection = function(p1, p2, polyClass) {
  */
 static.union = function(p1, p2, polyClass) {
 	if (polyClass == null || polyClass == undefined) polyClass = 'PolyDefault';
-	return Clip.clip( OperationType.GPC_UNION, p1, p2, polyClass );
+	return Clip.clip(OperationType.GPC_UNION, p1, p2, polyClass);
 };
 
 
