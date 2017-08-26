@@ -1,191 +1,24 @@
-var gpcas = gpcas || {};
-gpcas.util = {};
-gpcas.geometry = {};
 
 //////////
- 
-//Object.prototype.equals = function(x) {
-function equals(x1, x) {
-	var p;
-	for (p in x1) {
-		if (typeof(x[p]) === 'undefined') return false;
-	}
-
-	for (p in x1) {
-		if (x1[p]) {
-			switch(typeof(x1[p])) {
-				case 'object':
-					if (!equals(x1[p], x[p])) return false;
-					break;
-				case 'function':
-					if (typeof(x[p]) === 'undefined' || (p !== 'equals' && x1[p].toString() !== x[p].toString())) return false;
-					break;
-				default:
-					if (x1[p] !== x[p]) return false;
-			}
-		} else {
-			if (x[p]) return false;
-		}
-	}
-	for (p in x) {
-		if (typeof(x1[p]) === 'undefined') return false;
-	}
-	return true;
-}
-
-///point
-var Point = function(x, y) {
-	this.x = x;
-	this.y = y;
-};
-
-////////////// CLASS ArrayHelper ////////////////////////////////////
-
-gpcas.util.ArrayHelper = function() {};
-var static = gpcas.util.ArrayHelper;
-
-static.create2DArray = function(x, y) {
-	var a = [],
-		i = 0;
-	for (; i<x; i++) {
-		a[i] = [];
-	}
-	return a;
-};
-
-static.valueEqual = function(obj1, obj2) {
-	if (obj1 === obj2) return true;
-	if (equals(obj1, obj2)) return true;
-	return false;
-}
-
-static.sortPointsClockwise = function(vertices) {
-	var isArrayList  = false,
-		maxTop = null,
-		maxBottom = null,
-		maxLeft = null,
-		maxRight = null,
-		maxLeftIndex,
-		newVertices = vertices,
-		i, il, vertex,
-		j, jl,
-		reverse;
-
-	if (vertices instanceof ArrayList) {
-		vertices = vertices.toArray();
-		isArrayList = true;
-	}
-
-	for (i=0, il=vertices.length; i<il; i++) {
-		vertex  = vertices[i] ;
-		if ((maxTop === null || maxTop.y > vertex.y) || (maxTop.y === vertex.y && vertex.x < maxTop.x)) maxTop = vertex;
-		if ((maxBottom === null || maxBottom.y < vertex.y) || (maxBottom.y === vertex.y && vertex.x > maxBottom.x)) maxBottom = vertex;
-		if ((maxRight === null || maxRight.x < vertex.x) || (maxRight.x === vertex.x && vertex.y < maxRight.y)) maxRight = vertex;
-		if ((maxLeft === null || maxLeft.x > vertex.x) || (maxLeft.x === vertex.x && vertex.y > maxLeft.y)) {
-			maxLeft = vertex;
-			maxLeftIndex = i;
-		}
-	}
-
-	if (maxLeftIndex > 0) {
-		newVertices = []
-		j = 0;
-		for (i=maxLeftIndex, il=vertices.length; i<il; i++) {
-			newVertices[j++] = vertices[i];
-		}
-		for (i=0; i<maxLeftIndex; i++) {
-			newVertices[j++] = vertices[i];
-		}
-		vertices = newVertices;
-	}
-
-	reverse = false;
-	for (i=0, il=vertices.length; i<il; i++) {
-		vertex = vertices[i];
-		if (equals(vertex, maxBottom)) {
-			reverse = true;
-			break;
-		} else if (equals(vertex, maxTop)) {
-			break;
-		}
-	}
-	if (reverse) {
-		newVertices = []
-		newVertices[0] = vertices[0];
-		j =1;
-		for (i=vertices.length-1; i>0; i--) {
-			newVertices[j++] = vertices[i];
-		}
-		vertices = newVertices;
-	}
-	return isArrayList ? new ArrayList(vertices) : vertices;
-}
-
-/////////////// END ArrayHelper  ////////////////////////////////////////////////
-
-var ArrayHelper = gpcas.util.ArrayHelper;
-////////////////// CLASS ArrayList  /////////////////////////
-
-gpcas.util.ArrayList = function(arr) {
-	this._array = [];
-	if (arr != null) this._array = arr;
-};
-
-gpcas.util.ArrayList.prototype = {
-	add: function(value) {
-		this._array.push(value);
-	},
-	get: function(index) {
-		return this._array[index];
-	},
-	size: function() {
-		return this._array.length;
-	},
-	clear: function() {
-		this._array  = [];
-	},
-	equals: function(list) {
-		if (this._array.length != list.size()) return false;
-		for (var i=0, il=this._array.length; i<il; i++) {
-			if (!ArrayHelper.valueEqual(this._array[i], list.get(i))) return false;
-		}
-		return true;
-	},
-	hashCode: function() {
-		return 0;
-	},
-	isEmpty: function() {
-		return (this._array.length == 0);
-	},
-	toArray: function() {
-		return this._array;
-	}
-};
-
-///////////////// END ArrayList ////////////////////////
 
 
-
-
-
-
-gpcas.geometry.Clip = function() {
+GEOMETRY.Clip = function() {
 
 };
-gpcas.geometry.Clip.DEBUG = false;
-gpcas.geometry.Clip.GPC_EPSILON = 2.2204460492503131e-016;
-gpcas.geometry.Clip.GPC_VERSION = '2.31';
-gpcas.geometry.Clip.LEFT = 0;
-gpcas.geometry.Clip.RIGHT = 1;
-gpcas.geometry.Clip.ABOVE = 0;
-gpcas.geometry.Clip.BELOW = 1;
-gpcas.geometry.Clip.CLIP = 0;
-gpcas.geometry.Clip.SUBJ = 1;
+GEOMETRY.Clip.DEBUG = false;
+GEOMETRY.Clip.GPC_EPSILON = 2.2204460492503131e-016;
+GEOMETRY.Clip.GPC_VERSION = '2.31';
+GEOMETRY.Clip.LEFT = 0;
+GEOMETRY.Clip.RIGHT = 1;
+GEOMETRY.Clip.ABOVE = 0;
+GEOMETRY.Clip.BELOW = 1;
+GEOMETRY.Clip.CLIP = 0;
+GEOMETRY.Clip.SUBJ = 1;
 
 
 
-//var p = gpcas.geometry.Clip.prototype;
-var static = gpcas.geometry.Clip;
+//var p = GEOMETRY.Clip.prototype;
+var static = GEOMETRY.Clip;
 
 // ----------------------
 // --- Static Methods ---
@@ -1222,10 +1055,10 @@ static.add_intersection = function (it_node, edge0, edge1, x, y) {
 
 
 /////////// AetTree ////////////////////////////////////
-gpcas.geometry.AetTree = function() {
+GEOMETRY.AetTree = function() {
 	this.top_node = null; //EdgeNode
 };
-gpcas.geometry.AetTree.prototype.print = function() {
+GEOMETRY.AetTree.prototype.print = function() {
 	for (var edge = this.top_node; edge != null; edge = edge.next) {
 		//console.log('edge.vertex.x='+ edge.vertex.x +'  edge.vertex.y=' +edge.vertex.y);
 	}
@@ -1233,18 +1066,18 @@ gpcas.geometry.AetTree.prototype.print = function() {
 
 
 ///////////////  BundleState  //////////////////////////////
-gpcas.geometry.BundleState = function(state) {
+GEOMETRY.BundleState = function(state) {
 	this.m_State = state ; //String
 };
-gpcas.geometry.BundleState.UNBUNDLED = new gpcas.geometry.BundleState('UNBUNDLED');
-gpcas.geometry.BundleState.BUNDLE_HEAD = new gpcas.geometry.BundleState('BUNDLE_HEAD');
-gpcas.geometry.BundleState.BUNDLE_TAIL = new gpcas.geometry.BundleState('BUNDLE_TAIL');
-gpcas.geometry.BundleState.prototype.toString = function() {
+GEOMETRY.BundleState.UNBUNDLED = new GEOMETRY.BundleState('UNBUNDLED');
+GEOMETRY.BundleState.BUNDLE_HEAD = new GEOMETRY.BundleState('BUNDLE_HEAD');
+GEOMETRY.BundleState.BUNDLE_TAIL = new GEOMETRY.BundleState('BUNDLE_TAIL');
+GEOMETRY.BundleState.prototype.toString = function() {
 	return this.m_State;
 };
 
 /////////////// EdgeNode ////////////////////////////
-gpcas.geometry.EdgeNode = function() {
+GEOMETRY.EdgeNode = function() {
 	this.vertex = new Point(); /* Piggy-backed contour vertex data  */
 	this.bot = new Point();    /* Edge lower (x, y) coordinate      */
 	this.top = new Point();    /* Edge upper (x, y) coordinate      */
@@ -1268,11 +1101,11 @@ gpcas.geometry.EdgeNode = function() {
 ////////////////   EdgeTable /////////////////////////////////////////
 
 
-gpcas.geometry.EdgeTable = function() {
+GEOMETRY.EdgeTable = function() {
 	this.m_List = new ArrayList();
 };
 
-gpcas.geometry.EdgeTable.prototype = {
+GEOMETRY.EdgeTable.prototype = {
 	addNode: function(x,y) {
 		var node = new EdgeNode();
 		node.vertex.x = x;
@@ -1312,17 +1145,17 @@ gpcas.geometry.EdgeTable.prototype = {
 
 
 /////////////////////   HState   //////////////////////////////////////
-gpcas.geometry.HState = function() {};
-gpcas.geometry.HState.NH = 0; /* No horizontal edge                */
-gpcas.geometry.HState.BH = 1; /* Bottom horizontal edge            */
-gpcas.geometry.HState.TH = 2; /* Top horizontal edge               */
+GEOMETRY.HState = function() {};
+GEOMETRY.HState.NH = 0; /* No horizontal edge                */
+GEOMETRY.HState.BH = 1; /* Bottom horizontal edge            */
+GEOMETRY.HState.TH = 2; /* Top horizontal edge               */
 
-var NH = gpcas.geometry.HState.NH;
-var BH = gpcas.geometry.HState.BH;
-var TH = gpcas.geometry.HState.TH;
+var NH = GEOMETRY.HState.NH;
+var BH = GEOMETRY.HState.BH;
+var TH = GEOMETRY.HState.TH;
 
 /* Horizontal edge state transitions within scanbeam boundary */
-gpcas.geometry.HState.next_h_state =
+GEOMETRY.HState.next_h_state =
 	  [
 	  /*        ABOVE     BELOW     CROSS */
 	  /*        L   R     L   R     L   R */  
@@ -1334,19 +1167,19 @@ gpcas.geometry.HState.next_h_state =
 
 	  
 ///////////////////////    	  IntersectionPoint /////////////////////////////
-gpcas.geometry.IntersectionPoint = function(p1, p2, p3) {
+GEOMETRY.IntersectionPoint = function(p1, p2, p3) {
 	this.polygonPoint1 = p1;  /* of Point */;
 	this.polygonPoint2 = p2;  /* of Point */;
 	this.intersectionPoint = p3;
 };
 
-gpcas.geometry.IntersectionPoint.prototype.toString = function () {
+GEOMETRY.IntersectionPoint.prototype.toString = function () {
 	return 'P1 :'+ polygonPoint1.toString() +' P2:'+ polygonPoint2.toString() +' IP:'+ intersectionPoint.toString();
 }
 
 
 ///////////////////////////    ItNode   ///////////////
-gpcas.geometry.ItNode = function(edge0, edge1, x, y, next) {
+GEOMETRY.ItNode = function(edge0, edge1, x, y, next) {
 	this.ie = [];                    /* Intersecting edge (bundle) pair   */
 	this.point = new Point(x,y);     /* Point of intersection             */
 	this.next = next;                /* The next intersection table node  */
@@ -1356,10 +1189,10 @@ gpcas.geometry.ItNode = function(edge0, edge1, x, y, next) {
 
 
 ///////////////////////////    ItNodeTable   ///////////////
-gpcas.geometry.ItNodeTable = function() {
+GEOMETRY.ItNodeTable = function() {
 	this.top_node;
 }
-gpcas.geometry.ItNodeTable.prototype.build_intersection_table = function (aet, dy) {
+GEOMETRY.ItNodeTable.prototype.build_intersection_table = function (aet, dy) {
 	var st = null,
 		edge;
 	/* Process each AET edge */
@@ -1371,35 +1204,35 @@ gpcas.geometry.ItNodeTable.prototype.build_intersection_table = function (aet, d
 }
 
 ////////////// Line //////////////////////////
-gpcas.geometry.Line = function() {
+GEOMETRY.Line = function() {
 	this.start; 
 	this.end;
 }
 
 ////////////   LineHelper /////////////////////
 
-gpcas.geometry.LineHelper = function() {
+GEOMETRY.LineHelper = function() {
 
 };
 
-gpcas.geometry.LineHelper.equalPoint = function (p1, p2) {
+GEOMETRY.LineHelper.equalPoint = function (p1, p2) {
 	return p1[0] == p2[0] && p1[1] == p2[1];
 }
 
-gpcas.geometry.LineHelper.equalVertex = function(s1, e1, s2, e2) {
-	return (gpcas.geometry.LineHelper.equalPoint(s1, s2) && gpcas.geometry.LineHelper.equalPoint(e1, e2)) ||
-			(gpcas.geometry.LineHelper.equalPoint(s1, e2) && gpcas.geometry.LineHelper.equalPoint(e1, s2));
+GEOMETRY.LineHelper.equalVertex = function(s1, e1, s2, e2) {
+	return (GEOMETRY.LineHelper.equalPoint(s1, s2) && GEOMETRY.LineHelper.equalPoint(e1, e2)) ||
+			(GEOMETRY.LineHelper.equalPoint(s1, e2) && GEOMETRY.LineHelper.equalPoint(e1, s2));
 }
 
-gpcas.geometry.LineHelper.distancePoints = function(p1, p2) {
+GEOMETRY.LineHelper.distancePoints = function(p1, p2) {
 	return Math.sqrt((p2[0] - p1[0]) * (p2[0] - p1[0]) + (p2[1] - p1[1]) * (p2[1] - p1[1]));  
 }
 
-gpcas.geometry.LineHelper.clonePoint = function(p) {
+GEOMETRY.LineHelper.clonePoint = function(p) {
 	return [p[0], p[1]];
 }
 
-gpcas.geometry.LineHelper.cloneLine = function(line) {
+GEOMETRY.LineHelper.cloneLine = function(line) {
 	var res  = [],
 		il = line.length,
 		i = 0;
@@ -1409,7 +1242,7 @@ gpcas.geometry.LineHelper.cloneLine = function(line) {
 	return res;
 }
 
-gpcas.geometry.LineHelper.addLineToLine = function(line1, line2) {
+GEOMETRY.LineHelper.addLineToLine = function(line1, line2) {
 	var il = line2.length,
 		i = 0;
 	for (; i<il; i++) {
@@ -1417,7 +1250,7 @@ gpcas.geometry.LineHelper.addLineToLine = function(line1, line2) {
 	}
 }
 
-gpcas.geometry.LineHelper.roundPoint = function(p) {
+GEOMETRY.LineHelper.roundPoint = function(p) {
 	p[0] = Math.round(p[0]);
 	p[1] = Math.round(p[1]);
 }
@@ -1428,7 +1261,7 @@ gpcas.geometry.LineHelper.roundPoint = function(p) {
 //Return intersection of Segment "AB" and Segment "EF" as a Point
 //Return null if there is no intersection
 //---------------------------------------------------------------
-gpcas.geometry.LineHelper.lineIntersectLine = function(A, B, E, F, as_seg) {
+GEOMETRY.LineHelper.lineIntersectLine = function(A, B, E, F, as_seg) {
 	var denom,
 		ip,
 		a1,
@@ -1470,11 +1303,11 @@ gpcas.geometry.LineHelper.lineIntersectLine = function(A, B, E, F, as_seg) {
 
 
 //////////////  LineIntersection  ///////////////////////
-gpcas.geometry.LineIntersection = function() {
+GEOMETRY.LineIntersection = function() {
 
 };
 
-gpcas.geometry.LineIntersection.iteratePoints = function(points, s1, s2,e1,e2) {
+GEOMETRY.LineIntersection.iteratePoints = function(points, s1, s2,e1,e2) {
 	var direction = true,
 		pl = points.length,
 		s1Ind = points.indexOf(s1),
@@ -1502,7 +1335,7 @@ gpcas.geometry.LineIntersection.iteratePoints = function(points, s1, s2,e1,e2) {
 	return newPoints;			
 }
 
-gpcas.geometry.LineIntersection.intersectPoly = function(poly, line /* of Points */) {
+GEOMETRY.LineIntersection.intersectPoly = function(poly, line /* of Points */) {
 	var res = [],
 		numPoints = poly.getNumPoints(),
 		ip,
@@ -1585,7 +1418,7 @@ gpcas.geometry.LineIntersection.intersectPoly = function(poly, line /* of Points
 	}
 	return null;	
 }
-gpcas.geometry.LineIntersection.checkPoly = function(poly) {
+GEOMETRY.LineIntersection.checkPoly = function(poly) {
 	var noHoles = 0,
 		innerPoly,
 		il = poly.getNumInnerPoly(),
@@ -1603,7 +1436,7 @@ gpcas.geometry.LineIntersection.checkPoly = function(poly) {
 
 ///////////  LmtNode //////////////////////////
 
-gpcas.geometry.LmtNode = function(yvalue) {
+GEOMETRY.LmtNode = function(yvalue) {
 	this.y = yvalue;   /* Y coordinate at local minimum     */
 	this.first_bound;  /* Pointer to bound list             */
 	this.next;         /* Pointer to next local minimum     */
@@ -1611,11 +1444,11 @@ gpcas.geometry.LmtNode = function(yvalue) {
 
 ////////////// LmtTable ///////////////
 
-gpcas.geometry.LmtTable = function() {
+GEOMETRY.LmtTable = function() {
 	this.top_node;
 };
 
-gpcas.geometry.LmtTable.prototype.print = function() {
+GEOMETRY.LmtTable.prototype.print = function() {
 	var n = 0,
 		lmt = this.top_node,
 		edge;
@@ -1629,13 +1462,13 @@ gpcas.geometry.LmtTable.prototype.print = function() {
 }
 
 /////////////   OperationType //////////////////////////////////
-gpcas.geometry.OperationType = function(type) {
+GEOMETRY.OperationType = function(type) {
 	this.m_Type = type; 
 }
-gpcas.geometry.OperationType.GPC_DIFF  = new gpcas.geometry.OperationType( 'Difference' );
-gpcas.geometry.OperationType.GPC_INT   = new gpcas.geometry.OperationType( 'Intersection' );
-gpcas.geometry.OperationType.GPC_XOR   = new gpcas.geometry.OperationType( 'Exclusive or' );
-gpcas.geometry.OperationType.GPC_UNION = new gpcas.geometry.OperationType( 'Union' );
+GEOMETRY.OperationType.GPC_DIFF  = new GEOMETRY.OperationType( 'Difference' );
+GEOMETRY.OperationType.GPC_INT   = new GEOMETRY.OperationType( 'Intersection' );
+GEOMETRY.OperationType.GPC_XOR   = new GEOMETRY.OperationType( 'Exclusive or' );
+GEOMETRY.OperationType.GPC_UNION = new GEOMETRY.OperationType( 'Union' );
 
 //////////// Poly  /////////////////////
 // ---> an interface
@@ -1656,7 +1489,7 @@ gpcas.geometry.OperationType.GPC_UNION = new gpcas.geometry.OperationType( 'Unio
  *
  * @author  Dan Bridenbecker, Solution Engineering, Inc.
  */
-gpcas.geometry.PolyDefault = function(isHole) {
+GEOMETRY.PolyDefault = function(isHole) {
 	if (isHole == null) isHole = false;
 	/**
 	* Only applies to the first poly and can only be used with a poly that contains one poly
@@ -1668,7 +1501,7 @@ gpcas.geometry.PolyDefault = function(isHole) {
 /**
  * Return true if the given object is equal to this one.
  */
-gpcas.geometry.PolyDefault.prototype.equals = function (obj) {
+GEOMETRY.PolyDefault.prototype.equals = function (obj) {
 	if (!(obj instanceof PolyDefault)) return false;
 	var that = obj;
 	if (this.m_IsHole != that.m_IsHole) return false;
@@ -1682,7 +1515,7 @@ gpcas.geometry.PolyDefault.prototype.equals = function (obj) {
  * @return an integer value that is the same for two objects
  * whenever their internal representation is the same (equals() is true)
  **/
-gpcas.geometry.PolyDefault.prototype.hashCode = function () {
+GEOMETRY.PolyDefault.prototype.hashCode = function () {
 	var m_List = this.m_List;
 	
 	var result= 17;
@@ -1693,11 +1526,11 @@ gpcas.geometry.PolyDefault.prototype.hashCode = function () {
 /**
  * Remove all of the points.  Creates an empty polygon.
  */
-gpcas.geometry.PolyDefault.prototype.clear = function() {
+GEOMETRY.PolyDefault.prototype.clear = function() {
 	this.m_List.clear();
 }
 
-gpcas.geometry.PolyDefault.prototype.add = function(arg0, arg1) {
+GEOMETRY.PolyDefault.prototype.add = function(arg0, arg1) {
 	var args = [],
 		arr,
 		i, il;
@@ -1710,7 +1543,7 @@ gpcas.geometry.PolyDefault.prototype.add = function(arg0, arg1) {
 	} else if (args.length == 1) {
 		if (args[0] instanceof Point) {
 			this.addPoint(args[0]);	
-		} else if (args[0] instanceof gpcas.geometry.PolySimple) {
+		} else if (args[0] instanceof GEOMETRY.PolySimple) {
 			this.addPoly(args[0]);
 		} else if (args[0] instanceof Array) {
 			arr = args[0];
@@ -1731,7 +1564,7 @@ gpcas.geometry.PolyDefault.prototype.add = function(arg0, arg1) {
  * <b>Implementation Note:</b> If a point is added to an empty PolyDefault object,
  * it will create an inner polygon of type <code>PolySimple</code>.
  */
-gpcas.geometry.PolyDefault.prototype.addPointXY = function(x, y) {
+GEOMETRY.PolyDefault.prototype.addPointXY = function(x, y) {
 	this.addPoint(new Point(x, y));
 }
 
@@ -1741,7 +1574,7 @@ gpcas.geometry.PolyDefault.prototype.addPointXY = function(x, y) {
  * <b>Implementation Note:</b> If a point is added to an empty PolyDefault object,
  * it will create an inner polygon of type <code>PolySimple</code>.
  */
-gpcas.geometry.PolyDefault.prototype.addPoint = function( p) {
+GEOMETRY.PolyDefault.prototype.addPoint = function( p) {
 	var m_List = this.m_List;
 	if (m_List.size() == 0) {
 		m_List.add(new PolySimple());
@@ -1757,7 +1590,7 @@ gpcas.geometry.PolyDefault.prototype.addPoint = function( p) {
  * zero and this polygon was designated a hole.  This would break the assumption
  * that only simple polygons can be holes.
  */
-gpcas.geometry.PolyDefault.prototype.addPoly = function( p) {
+GEOMETRY.PolyDefault.prototype.addPoly = function( p) {
 	var m_IsHole = this.m_IsHole,
 		m_List = this.m_List;
 	if (m_List.size() > 0 && m_IsHole) {
@@ -1769,7 +1602,7 @@ gpcas.geometry.PolyDefault.prototype.addPoly = function( p) {
 /**
  * Return true if the polygon is empty
  */
-gpcas.geometry.PolyDefault.prototype.isEmpty = function() {
+GEOMETRY.PolyDefault.prototype.isEmpty = function() {
 	return this.m_List.isEmpty();
 }
 
@@ -1777,7 +1610,7 @@ gpcas.geometry.PolyDefault.prototype.isEmpty = function() {
  * Returns the bounding rectangle of this polygon.
  * <strong>WARNING</strong> Not supported on complex polygons.
  */
-gpcas.geometry.PolyDefault.prototype.getBounds = function () {
+GEOMETRY.PolyDefault.prototype.getBounds = function () {
 	var m_List = this.m_List,
 		ip;
 	if (m_List.size() == 0) {
@@ -1793,40 +1626,40 @@ gpcas.geometry.PolyDefault.prototype.getBounds = function () {
 /**
  * Returns the polygon at this index.
  */
-gpcas.geometry.PolyDefault.prototype.getInnerPoly = function(polyIndex) {
+GEOMETRY.PolyDefault.prototype.getInnerPoly = function(polyIndex) {
 	return this.m_List.get(polyIndex);
 }
 
 /**
  * Returns the number of inner polygons - inner polygons are assumed to return one here.
  */
-gpcas.geometry.PolyDefault.prototype.getNumInnerPoly = function() {
+GEOMETRY.PolyDefault.prototype.getNumInnerPoly = function() {
 	return this.m_List.size();
 }
 
 /**
  * Return the number points of the first inner polygon
  */
-gpcas.geometry.PolyDefault.prototype.getNumPoints = function () {
+GEOMETRY.PolyDefault.prototype.getNumPoints = function () {
 	return this.m_List.get(0).getNumPoints();
 }
 
 /**
  * Return the X value of the point at the index in the first inner polygon
  */
-gpcas.geometry.PolyDefault.prototype.getX = function(index) {
+GEOMETRY.PolyDefault.prototype.getX = function(index) {
 	  return this.m_List.get(0).getX(index);
 }
 
-gpcas.geometry.PolyDefault.prototype.getPoint = function(index) {
+GEOMETRY.PolyDefault.prototype.getPoint = function(index) {
 	return this.m_List.get(0).getPoint(index);
 }
 
-gpcas.geometry.PolyDefault.prototype.getPoints = function() {
+GEOMETRY.PolyDefault.prototype.getPoints = function() {
 	return this.m_List.get(0).getPoints();
 }
 
-gpcas.geometry.PolyDefault.prototype.isPointInside = function (point) {
+GEOMETRY.PolyDefault.prototype.isPointInside = function (point) {
 	var m_List = this.m_List,
 		i, il,
 		poly;
@@ -1842,7 +1675,7 @@ gpcas.geometry.PolyDefault.prototype.isPointInside = function (point) {
 /**
  * Return the Y value of the point at the index in the first inner polygon
  */
-gpcas.geometry.PolyDefault.prototype.getY = function (index) {
+GEOMETRY.PolyDefault.prototype.getY = function (index) {
 	return this.m_List.get(0).getY(index) ;
 }
 
@@ -1852,7 +1685,7 @@ gpcas.geometry.PolyDefault.prototype.getY = function (index) {
  *
  * @throws IllegalStateException if called on a complex polygon.
  */
-gpcas.geometry.PolyDefault.prototype.isHole = function () {
+GEOMETRY.PolyDefault.prototype.isHole = function () {
 	if (this.m_List.size() > 1) {
 		throw 'Cannot call on a poly made up of more than one poly.';
 	}
@@ -1864,7 +1697,7 @@ gpcas.geometry.PolyDefault.prototype.isHole = function () {
  *
  * @throws IllegalStateException if called on a complex polygon.
  */
-gpcas.geometry.PolyDefault.prototype.setIsHole = function(isHole) {
+GEOMETRY.PolyDefault.prototype.setIsHole = function(isHole) {
 	if (this.m_List.size() > 1) {
 		throw 'Cannot call on a poly made up of more than one poly.';
 	}
@@ -1875,7 +1708,7 @@ gpcas.geometry.PolyDefault.prototype.setIsHole = function(isHole) {
  * Return true if the given inner polygon is contributing to the set operation.
  * This method should NOT be used outside the Clip algorithm.
  */
-gpcas.geometry.PolyDefault.prototype.isContributing = function( polyIndex) {
+GEOMETRY.PolyDefault.prototype.isContributing = function( polyIndex) {
 	return this.m_List.get(polyIndex).isContributing(0);
 }
 
@@ -1885,7 +1718,7 @@ gpcas.geometry.PolyDefault.prototype.isContributing = function( polyIndex) {
  *
  * @throws IllegalStateException if called on a complex polygon
  */
-gpcas.geometry.PolyDefault.prototype.setContributing = function( polyIndex, contributes) {
+GEOMETRY.PolyDefault.prototype.setContributing = function( polyIndex, contributes) {
 	if (this.m_List.size() != 1) {
 		throw 'Only applies to polys of size 1';
 	}
@@ -1898,7 +1731,7 @@ gpcas.geometry.PolyDefault.prototype.setContributing = function( polyIndex, cont
  *
  * @return the returned Poly will be an instance of PolyDefault.
  */
-gpcas.geometry.PolyDefault.prototype.intersection = function(p) {
+GEOMETRY.PolyDefault.prototype.intersection = function(p) {
 	return Clip.intersection(p, this, 'PolyDefault');
 }
 
@@ -1908,7 +1741,7 @@ gpcas.geometry.PolyDefault.prototype.intersection = function(p) {
  *
  * @return the returned Poly will be an instance of PolyDefault.
  */
-gpcas.geometry.PolyDefault.prototype.union = function(p) {
+GEOMETRY.PolyDefault.prototype.union = function(p) {
 	return Clip.union( p, this, 'PolyDefault');
 }
 
@@ -1918,7 +1751,7 @@ gpcas.geometry.PolyDefault.prototype.union = function(p) {
  *
  * @return the returned Poly will be an instance of PolyDefault.
  */
-gpcas.geometry.PolyDefault.prototype.xor = function(p) {
+GEOMETRY.PolyDefault.prototype.xor = function(p) {
 	return Clip.xor( p, this, 'PolyDefault' );
 }
 
@@ -1928,14 +1761,14 @@ gpcas.geometry.PolyDefault.prototype.xor = function(p) {
  *
  * @return the returned Poly will be an instance of PolyDefault.
  */
-gpcas.geometry.PolyDefault.prototype.difference = function(p) {
+GEOMETRY.PolyDefault.prototype.difference = function(p) {
 	return Clip.difference(p,this, 'PolyDefault');
 }
 
 /**
  * Return the area of the polygon in square units.
  */
-gpcas.geometry.PolyDefault.prototype.getArea = function() {
+GEOMETRY.PolyDefault.prototype.getArea = function() {
 	var area = 0.0,
 		il = getNumInnerPoly(),
 		i = 0,
@@ -1952,7 +1785,7 @@ gpcas.geometry.PolyDefault.prototype.getArea = function() {
 // -----------------------
 // --- Package Methods ---
 // -----------------------
-gpcas.geometry.PolyDefault.prototype.toString = function() {
+GEOMETRY.PolyDefault.prototype.toString = function() {
 	var res = '',
 		points,
 		m_List = this.m_List,
@@ -1976,7 +1809,7 @@ gpcas.geometry.PolyDefault.prototype.toString = function() {
 }
    
 ///////////////  Polygon   /////////////////////////////////
-gpcas.geometry.Polygon = function() {
+GEOMETRY.Polygon = function() {
 	this.maxTop;
 	this.maxBottom;
 	this.maxLeft;
@@ -1984,7 +1817,7 @@ gpcas.geometry.Polygon = function() {
 	this.vertices;
 };
 
-gpcas.geometry.Polygon.prototype.fromArray = function(v) {
+GEOMETRY.Polygon.prototype.fromArray = function(v) {
 	var pointArr,
 		i = 0,
 		il = v.length;
@@ -1996,7 +1829,7 @@ gpcas.geometry.Polygon.prototype.fromArray = function(v) {
 }
 
 /*Normalize vertices in polygon to be ordered clockwise from most left point*/
-gpcas.geometry.Polygon.prototype.normalize = function() {
+GEOMETRY.Polygon.prototype.normalize = function() {
 	var maxLeftIndex,
 		vertices = this.vertices,
 		newVertices = this.vertices,
@@ -2049,7 +1882,7 @@ gpcas.geometry.Polygon.prototype.normalize = function() {
 	}
 }
 
-gpcas.geometry.Polygon.prototype.getVertexIndex = function(vertex) {
+GEOMETRY.Polygon.prototype.getVertexIndex = function(vertex) {
 	var il = this.vertices.length,
 		i = 0;
 	for (; i<il; i++) {
@@ -2058,7 +1891,7 @@ gpcas.geometry.Polygon.prototype.getVertexIndex = function(vertex) {
 	return -1;
 }
 
-gpcas.geometry.Polygon.prototype.insertVertex = function(vertex1, vertex2, newVertex) {
+GEOMETRY.Polygon.prototype.insertVertex = function(vertex1, vertex2, newVertex) {
 	var vertex1Index = getVertexIndex(vertex1),
 		vertex2Index = getVertexIndex(vertex2),
 		newVertices,
@@ -2086,13 +1919,13 @@ gpcas.geometry.Polygon.prototype.insertVertex = function(vertex1, vertex2, newVe
 	return true;
 }
 
-gpcas.geometry.Polygon.prototype.clone = function() {
+GEOMETRY.Polygon.prototype.clone = function() {
 	var res = new Polygon();
 	res.vertices = vertices.slice(this.vertices.length-1);
 	return res;
 }
 
-gpcas.geometry.Polygon.prototype.toString = function() {
+GEOMETRY.Polygon.prototype.toString = function() {
 	var vertices = this.vertices,
 		res = '[',
 		il = vertices.length,
@@ -2108,7 +1941,7 @@ gpcas.geometry.Polygon.prototype.toString = function() {
 
 
 ////////////////////  PolygonNode ///////////////////////////
-gpcas.geometry.PolygonNode = function(next, x, y) {
+GEOMETRY.PolygonNode = function(next, x, y) {
 	var vn;
 
 	this.active;  /* Active flag / vertex count        */
@@ -2126,7 +1959,7 @@ gpcas.geometry.PolygonNode = function(next, x, y) {
 	this.active = 1;
 }
 
-gpcas.geometry.PolygonNode.prototype.add_right = function(x, y) {
+GEOMETRY.PolygonNode.prototype.add_right = function(x, y) {
 	var nv = new VertexNode(x, y);
 
 	/* Add vertex nv to the right end of the polygon's vertex list */
@@ -2136,7 +1969,7 @@ gpcas.geometry.PolygonNode.prototype.add_right = function(x, y) {
 	this.proxy.v[Clip.RIGHT] = nv;
 }
 
-gpcas.geometry.PolygonNode.prototype.add_left = function( x, y) {
+GEOMETRY.PolygonNode.prototype.add_left = function( x, y) {
 	var proxy = this.proxy,
 		nv = new VertexNode(x, y);
 
@@ -2158,7 +1991,7 @@ gpcas.geometry.PolygonNode.prototype.add_left = function( x, y) {
  *
  * @author  Dan Bridenbecker, Solution Engineering, Inc.
  */
-gpcas.geometry.PolySimple = function() {
+GEOMETRY.PolySimple = function() {
 	/**
 	* The list of Point objects in the polygon.
 	*/
@@ -2174,7 +2007,7 @@ gpcas.geometry.PolySimple = function() {
 	* <strong>WARNING:</strong> This method failse if the first point
 	* appears more than once in the list.
 	*/
-gpcas.geometry.PolySimple.prototype.equals = function(obj) {
+GEOMETRY.PolySimple.prototype.equals = function(obj) {
 	if (!(obj instanceof PolySimple)) return false;
 
 	var that = obj,
@@ -2233,7 +2066,7 @@ gpcas.geometry.PolySimple.prototype.equals = function(obj) {
  * @return an integer value that is the same for two objects
  * whenever their internal representation is the same (equals() is true)
  */
-gpcas.geometry.PolySimple.prototype.hashCode = function() {
+GEOMETRY.PolySimple.prototype.hashCode = function() {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// !!! WARNING:  This hash and equals break the contract. !!!
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2245,7 +2078,7 @@ gpcas.geometry.PolySimple.prototype.hashCode = function() {
 /**
  * Return a string briefly describing the polygon.
  */
-gpcas.geometry.PolySimple.prototype.toString = function() {
+GEOMETRY.PolySimple.prototype.toString = function() {
 	return 'PolySimple: num_points='+ getNumPoints();
 }
 
@@ -2256,12 +2089,12 @@ gpcas.geometry.PolySimple.prototype.toString = function() {
 /**
  * Remove all of the points.  Creates an empty polygon.
  */
-gpcas.geometry.PolySimple.prototype.clear = function() {
+GEOMETRY.PolySimple.prototype.clear = function() {
 	this.m_List.clear();
 }
    
    
-gpcas.geometry.PolySimple.prototype.add = function(arg0,arg1) {
+GEOMETRY.PolySimple.prototype.add = function(arg0,arg1) {
 	var args = [],
 		val,
 		k, kl;
@@ -2286,35 +2119,35 @@ gpcas.geometry.PolySimple.prototype.add = function(arg0,arg1) {
 /**
  * Add a point to the first inner polygon.
  */
-gpcas.geometry.PolySimple.prototype.addPointXY = function(x, y) {
+GEOMETRY.PolySimple.prototype.addPointXY = function(x, y) {
 	this.addPoint(new Point(x, y));
 }
    
 /**
  * Add a point to the first inner polygon.
  */
-gpcas.geometry.PolySimple.prototype.addPoint = function(p) {
+GEOMETRY.PolySimple.prototype.addPoint = function(p) {
 	this.m_List.add(p);
 }
    
 /**
  * Throws IllegalStateexception if called
  */
-gpcas.geometry.PolySimple.prototype.addPoly = function(p) {
+GEOMETRY.PolySimple.prototype.addPoly = function(p) {
 	throw 'Cannot add poly to a simple poly.';
 }
    
 /**
  * Return true if the polygon is empty
  */
-gpcas.geometry.PolySimple.prototype.isEmpty = function() {
+GEOMETRY.PolySimple.prototype.isEmpty = function() {
 	return this.m_List.isEmpty();
 }
    
 /**
  * Returns the bounding rectangle of this polygon.
  */
-gpcas.geometry.PolySimple.prototype.getBounds = function() {
+GEOMETRY.PolySimple.prototype.getBounds = function() {
 	var xmin =  Number.MAX_VALUE,
 		ymin =  Number.MAX_VALUE,
 		xmax = -Number.MAX_VALUE,
@@ -2337,7 +2170,7 @@ gpcas.geometry.PolySimple.prototype.getBounds = function() {
  * Returns <code>this</code> if <code>polyIndex = 0</code>, else it throws
  * IllegalStateException.
  */
-gpcas.geometry.PolySimple.prototype.getInnerPoly = function(polyIndex) {
+GEOMETRY.PolySimple.prototype.getInnerPoly = function(polyIndex) {
 	if (polyIndex != 0) alert('PolySimple only has one poly');
 	return this;
 }
@@ -2345,40 +2178,40 @@ gpcas.geometry.PolySimple.prototype.getInnerPoly = function(polyIndex) {
 /**
  * Always returns 1.
  */
-gpcas.geometry.PolySimple.prototype.getNumInnerPoly = function() {
+GEOMETRY.PolySimple.prototype.getNumInnerPoly = function() {
 	return 1;
 }
 
 /**
  * Return the number points of the first inner polygon
  */
-gpcas.geometry.PolySimple.prototype.getNumPoints = function() {
+GEOMETRY.PolySimple.prototype.getNumPoints = function() {
 	return this.m_List.size();
 }   
 
 /**
  * Return the X value of the point at the index in the first inner polygon
  */
-gpcas.geometry.PolySimple.prototype.getX = function(index) {
+GEOMETRY.PolySimple.prototype.getX = function(index) {
 	return this.m_List.get(index).x;
 }
 
 /**
  * Return the Y value of the point at the index in the first inner polygon
  */
-gpcas.geometry.PolySimple.prototype.getY = function(index) {
+GEOMETRY.PolySimple.prototype.getY = function(index) {
 	return this.m_List.get(index).y;
 }
    
-gpcas.geometry.PolySimple.prototype.getPoint = function(index) {
+GEOMETRY.PolySimple.prototype.getPoint = function(index) {
 	return this.m_List.get(index);
 }
    
-gpcas.geometry.PolySimple.prototype.getPoints = function() {
+GEOMETRY.PolySimple.prototype.getPoints = function() {
 	return this.m_List.toArray();
 }
    
-gpcas.geometry.PolySimple.prototype.isPointInside = function(point) {
+GEOMETRY.PolySimple.prototype.isPointInside = function(point) {
 	var points  = this.getPoints(),
 	 	j = points.length - 1,
 	 	oddNodes = false,
@@ -2399,14 +2232,14 @@ gpcas.geometry.PolySimple.prototype.isPointInside = function(point) {
 /**
  * Always returns false since PolySimples cannot be holes.
  */
-gpcas.geometry.PolySimple.prototype.isHole = function() {
+GEOMETRY.PolySimple.prototype.isHole = function() {
 	  return false ;
 }
 
 /**
  * Throws IllegalStateException if called.
  */
-gpcas.geometry.PolySimple.prototype.setIsHole = function(isHole) {
+GEOMETRY.PolySimple.prototype.setIsHole = function(isHole) {
 	throw 'PolySimple cannot be a hole';
 }
    
@@ -2416,7 +2249,7 @@ gpcas.geometry.PolySimple.prototype.setIsHole = function(isHole) {
  *
  * @throws IllegalStateException if <code>polyIndex != 0</code>
  */
-gpcas.geometry.PolySimple.prototype.isContributing = function(polyIndex) {
+GEOMETRY.PolySimple.prototype.isContributing = function(polyIndex) {
 	if (polyIndex != 0) {
 		throw 'PolySimple only has one poly';
 	}
@@ -2429,7 +2262,7 @@ gpcas.geometry.PolySimple.prototype.isContributing = function(polyIndex) {
  *
  * @throws IllegalStateException if <code>polyIndex != 0</code>
  */
-gpcas.geometry.PolySimple.prototype.setContributing = function( polyIndex, contributes) {
+GEOMETRY.PolySimple.prototype.setContributing = function( polyIndex, contributes) {
 	if (polyIndex != 0) {
 		throw "PolySimple only has one poly";
 	}
@@ -2442,7 +2275,7 @@ gpcas.geometry.PolySimple.prototype.setContributing = function( polyIndex, contr
  *
  * @return The returned Poly is of type PolySimple
  */
-gpcas.geometry.PolySimple.prototype.intersection = function(p) {
+GEOMETRY.PolySimple.prototype.intersection = function(p) {
 	return Clip.intersection( this, p, 'PolySimple');
 }
    
@@ -2452,7 +2285,7 @@ gpcas.geometry.PolySimple.prototype.intersection = function(p) {
  *
  * @return The returned Poly is of type PolySimple
  */
-gpcas.geometry.PolySimple.prototype.union = function(p) {
+GEOMETRY.PolySimple.prototype.union = function(p) {
 	  return Clip.union( this, p, 'PolySimple');
 }
    
@@ -2462,7 +2295,7 @@ gpcas.geometry.PolySimple.prototype.union = function(p) {
  *
  * @return The returned Poly is of type PolySimple
  */
-gpcas.geometry.PolySimple.prototype.xor = function(p) {
+GEOMETRY.PolySimple.prototype.xor = function(p) {
 	return Clip.xor( p, this, 'PolySimple');
 }
    
@@ -2472,7 +2305,7 @@ gpcas.geometry.PolySimple.prototype.xor = function(p) {
  *
  * @return the returned Poly will be an instance of PolyDefault.
  */
-gpcas.geometry.PolySimple.prototype.difference = function(p) {
+GEOMETRY.PolySimple.prototype.difference = function(p) {
 	return Clip.difference(p, this, 'PolySimple');
 }
 		 
@@ -2482,7 +2315,7 @@ gpcas.geometry.PolySimple.prototype.difference = function(p) {
  * The algorithm for the area of a complex polygon was take from
  * code by Joseph O'Rourke author of " Computational Geometry in C".
  */
-gpcas.geometry.PolySimple.prototype.getArea = function() {
+GEOMETRY.PolySimple.prototype.getArea = function() {
 	var ax, ay,
 		bx, by,
 		cx, cy,
@@ -2508,13 +2341,13 @@ gpcas.geometry.PolySimple.prototype.getArea = function() {
 }
    
 /////////////////////// Rectangle  ///////////////////
-gpcas.geometry.Rectangle = function(_x, _y, _w, _h) {
+GEOMETRY.Rectangle = function(_x, _y, _w, _h) {
 	this.x = _x; 
 	this.y = _y;
 	this.w = _w;
 	this.h = _h;
 }
-gpcas.geometry.Rectangle.prototype = {
+GEOMETRY.Rectangle.prototype = {
 	getMaxY: function() {
 		return this.y + this.h;
 	},
@@ -2533,18 +2366,18 @@ gpcas.geometry.Rectangle.prototype = {
 };
 
 /////////////////// ScanBeamTree //////////////////////
-gpcas.geometry.ScanBeamTree = function(yvalue) {
+GEOMETRY.ScanBeamTree = function(yvalue) {
 	this.y = yvalue;   /* Scanbeam node y value             */
 	this.less;         /* Pointer to nodes with lower y     */
 	this.more;         /* Pointer to nodes with higher y    */
 }
 
 ///////////////////////// ScanBeamTreeEntries /////////////////
-gpcas.geometry.ScanBeamTreeEntries = function() {
+GEOMETRY.ScanBeamTreeEntries = function() {
 	this.sbt_entries = 0;
 	this.sb_tree;
 };
-gpcas.geometry.ScanBeamTreeEntries.prototype.build_sbt = function() {
+GEOMETRY.ScanBeamTreeEntries.prototype.build_sbt = function() {
 	var sbt = [],
 		entries = 0;
 	entries = this.inner_build_sbt(entries, sbt, this.sb_tree);
@@ -2553,7 +2386,7 @@ gpcas.geometry.ScanBeamTreeEntries.prototype.build_sbt = function() {
 	// }
 	return sbt;
 }
-gpcas.geometry.ScanBeamTreeEntries.prototype.inner_build_sbt = function( entries, sbt, sbt_node) {
+GEOMETRY.ScanBeamTreeEntries.prototype.inner_build_sbt = function( entries, sbt, sbt_node) {
 	if (sbt_node.less != null) {
 		entries = this.inner_build_sbt(entries, sbt, sbt_node.less);
 	}
@@ -2566,7 +2399,7 @@ gpcas.geometry.ScanBeamTreeEntries.prototype.inner_build_sbt = function( entries
 }
 
 ///////////////////////////  StNode
-gpcas.geometry.StNode = function( edge, prev) {
+GEOMETRY.StNode = function( edge, prev) {
 	this.edge;         /* Pointer to AET edge               */
 	this.xb;           /* Scanbeam bottom x coordinate      */
 	this.xt;           /* Scanbeam top x coordinate         */
@@ -2580,17 +2413,17 @@ gpcas.geometry.StNode = function( edge, prev) {
 }	
 
 /////////////////////   TopPolygonNode /////////////////
-gpcas.geometry.TopPolygonNode = function() {
+GEOMETRY.TopPolygonNode = function() {
 	this.top_node;
 };
 
-gpcas.geometry.TopPolygonNode.prototype.add_local_min = function(x, y) {
+GEOMETRY.TopPolygonNode.prototype.add_local_min = function(x, y) {
 	 var existing_min = this.top_node;
 	 this.top_node = new PolygonNode(existing_min, x, y);
 	 return this.top_node ;
 }
 
-gpcas.geometry.TopPolygonNode.prototype.merge_left = function(p, q) {
+GEOMETRY.TopPolygonNode.prototype.merge_left = function(p, q) {
 	var top_node = this.top_node,
 		target,
 		node;
@@ -2614,7 +2447,7 @@ gpcas.geometry.TopPolygonNode.prototype.merge_left = function(p, q) {
 	}
 }
 
-gpcas.geometry.TopPolygonNode.prototype.merge_right = function(p, q) {
+GEOMETRY.TopPolygonNode.prototype.merge_right = function(p, q) {
 	var top_node = this.top_node,
 		target,
 		node;
@@ -2638,7 +2471,7 @@ gpcas.geometry.TopPolygonNode.prototype.merge_right = function(p, q) {
 	}
 }
 
-gpcas.geometry.TopPolygonNode.prototype.count_contours = function() {
+GEOMETRY.TopPolygonNode.prototype.count_contours = function() {
 	var nc = 0,
 		nv,
 		polygon = this.top_node,
@@ -2663,7 +2496,7 @@ gpcas.geometry.TopPolygonNode.prototype.count_contours = function() {
 	return nc;
 }
 
-gpcas.geometry.TopPolygonNode.prototype.getResult = function(polyClass) {
+GEOMETRY.TopPolygonNode.prototype.getResult = function(polyClass) {
 	var top_node = this.top_node,
 		result = Clip.createNewPoly(polyClass),
 		num_contours = this.count_contours(),
@@ -2713,7 +2546,7 @@ gpcas.geometry.TopPolygonNode.prototype.getResult = function(polyClass) {
 	return result;
 }
 
-gpcas.geometry.TopPolygonNode.prototype.print = function() {
+GEOMETRY.TopPolygonNode.prototype.print = function() {
 	var top_node = this.top_node,
 		c = 0,
 		npoly_node = null,
@@ -2730,40 +2563,40 @@ gpcas.geometry.TopPolygonNode.prototype.print = function() {
 }
   
 ///////////    VertexNode  ///////////////
-gpcas.geometry.VertexNode = function(x, y) {
+GEOMETRY.VertexNode = function(x, y) {
 	this.x = x;       // X coordinate component
 	this.y = y;       // Y coordinate component
 	this.next = null; // Pointer to next vertex in list
 }
 
 /////////////   VertexType   /////////////
-gpcas.geometry.VertexType = function() {
+GEOMETRY.VertexType = function() {
 
 };
-gpcas.geometry.VertexType.NUL =  0; /* Empty non-intersection            */
-gpcas.geometry.VertexType.EMX =  1; /* External maximum                  */
-gpcas.geometry.VertexType.ELI =  2; /* External left intermediate        */
-gpcas.geometry.VertexType.TED =  3; /* Top edge                          */
-gpcas.geometry.VertexType.ERI =  4; /* External right intermediate       */
-gpcas.geometry.VertexType.RED =  5; /* Right edge                        */
-gpcas.geometry.VertexType.IMM =  6; /* Internal maximum and minimum      */
-gpcas.geometry.VertexType.IMN =  7; /* Internal minimum                  */
-gpcas.geometry.VertexType.EMN =  8; /* External minimum                  */
-gpcas.geometry.VertexType.EMM =  9; /* External maximum and minimum      */
-gpcas.geometry.VertexType.LED = 10; /* Left edge                         */
-gpcas.geometry.VertexType.ILI = 11; /* Internal left intermediate        */
-gpcas.geometry.VertexType.BED = 12; /* Bottom edge                       */
-gpcas.geometry.VertexType.IRI = 13; /* Internal right intermediate       */
-gpcas.geometry.VertexType.IMX = 14; /* Internal maximum                  */
-gpcas.geometry.VertexType.FUL = 15; /* Full non-intersection             */ 
-gpcas.geometry.VertexType.getType = function(tr, tl ,br ,bl) {
+GEOMETRY.VertexType.NUL =  0; /* Empty non-intersection            */
+GEOMETRY.VertexType.EMX =  1; /* External maximum                  */
+GEOMETRY.VertexType.ELI =  2; /* External left intermediate        */
+GEOMETRY.VertexType.TED =  3; /* Top edge                          */
+GEOMETRY.VertexType.ERI =  4; /* External right intermediate       */
+GEOMETRY.VertexType.RED =  5; /* Right edge                        */
+GEOMETRY.VertexType.IMM =  6; /* Internal maximum and minimum      */
+GEOMETRY.VertexType.IMN =  7; /* Internal minimum                  */
+GEOMETRY.VertexType.EMN =  8; /* External minimum                  */
+GEOMETRY.VertexType.EMM =  9; /* External maximum and minimum      */
+GEOMETRY.VertexType.LED = 10; /* Left edge                         */
+GEOMETRY.VertexType.ILI = 11; /* Internal left intermediate        */
+GEOMETRY.VertexType.BED = 12; /* Bottom edge                       */
+GEOMETRY.VertexType.IRI = 13; /* Internal right intermediate       */
+GEOMETRY.VertexType.IMX = 14; /* Internal maximum                  */
+GEOMETRY.VertexType.FUL = 15; /* Full non-intersection             */ 
+GEOMETRY.VertexType.getType = function(tr, tl ,br ,bl) {
 	return tr + (tl << 1) + (br << 2) + (bl << 3);
 }   
 	  
 ////////////////// WeilerAtherton  /////////////
-gpcas.geometry.WeilerAtherton = function() {};
+GEOMETRY.WeilerAtherton = function() {};
 
-gpcas.geometry.WeilerAtherton.prototype.merge = function(p1, p2) {
+GEOMETRY.WeilerAtherton.prototype.merge = function(p1, p2) {
 	p1 = p1.clone();
 	p2 = p2.clone();
 }

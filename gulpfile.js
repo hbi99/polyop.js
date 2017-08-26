@@ -18,10 +18,11 @@ var include_options = {
 		basepath  : '@file'
 	},
 	srcPaths = {
-		script  : ['src/js/main.js'],
+		script  : ['src/**/*.js', 'src/polyop.js'],
 		styles  : ['demo/res/style.less']
 	},
 	destPaths = {
+		script  : ['dist/'],
 		styles  : ['demo/res/']
 	};
 
@@ -32,7 +33,8 @@ var include_options = {
 
 gulp.task('help', function() {
 	console.log('\n----------------------------------------------------------------------------------\n');
-	console.log('  gulp frontend'.white    +'\t\tWatch and auto-compiles files and restart node-server'.grey);
+	console.log('  gulp scripts'.white    +'\t\t'.grey);
+	console.log('  gulp styles:demo'.white    +'\t\t'.grey);
 	console.log('\n----------------------------------------------------------------------------------\n\n');
 });
 
@@ -46,8 +48,19 @@ gulp.task('styles:demo', function() {
 		.pipe($.size({title: 'styles:demo'}));
 });
 
+// Processes javascript files
+gulp.task('scripts', function() {
+	return gulp.src(srcPaths.script[1])
+		.pipe($.fileInclude(include_options))
+		.pipe($.uglify())
+		.pipe($.rename({suffix: '.min'}))
+		.pipe(gulp.dest(destPaths.script[0]))
+		.pipe($.size({title: 'scripts'}));
+});
+
 // Watch source files and moves them accordingly
 gulp.task('watch', function() {
+	gulp.watch(srcPaths.script[0], ['scripts']);
 	gulp.watch(srcPaths.styles[0], ['styles:demo']);
 });
 
