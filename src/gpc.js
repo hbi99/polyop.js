@@ -1503,104 +1503,99 @@ gpcas.geometry.LineIntersection.iteratePoints = function(points, s1, s2,e1,e2) {
 }
 
 gpcas.geometry.LineIntersection.intersectPoly = function(poly, line /* of Points */) {
-	var res = [];
-	var numPoints = poly.getNumPoints();
+	var res = [],
+		numPoints = poly.getNumPoints(),
+		ip,
+		p1,
+		p2,
+		p3,
+		p4,
+		firstIntersection = null,
+		lastIntersection = null,
+		firstIntersectionLineIndex = -1,
+		lastIntersectionLineIndex = -1,
+		firstFound = false,
+		il = line.length,
+		i = 1,
+		j,
+		maxDist,
+		minDist,
+		dist,
+		newLine,
+		poly1,
+		poly2,
+		finPoly1,
+		finPoly2,
+		points1,
+		points2;
 	
-	//points
-	var ip ;
-	var p1 ;
-	var p2 ;
-	var p3 ;
-	var p4 ;
-	var firstIntersection  = null;
-	var lastIntersection   = null;
-	var firstIntersectionLineIndex=-1;
-	var lastIntersectionLineIndex=-1;
-	var firstFound  = false;
-	
-	for (var i  = 1; i<line.length; i++) {
-		p1=line[i-1];
-		p2=line[i];
-		var maxDist  = 0;
-		var minDist	 = Number.MAX_VALUE;
-		var dist  = -1;
-		for (var j  = 0; j<numPoints; j++) {
-			p3=poly.getPoint(j==0?numPoints-1:j-1);
-			p4=poly.getPoint(j);	
-			if ((ip=LineHelper.lineIntersectLine(p1,p2,p3,p4))!=null) {
-				dist=Point.distance(ip,p2);		
-					
-				if ((dist>maxDist) && (!firstFound)) {
-					maxDist=dist;
-					firstIntersection=new IntersectionPoint(p3,p4,ip);
-					firstIntersectionLineIndex=i;
+	for (;i<il; i++) {
+		p1 = line[i-1];
+		p2 = line[i];
+		maxDist = 0;
+		minDist = Number.MAX_VALUE;
+		dist = -1;
+		for (j=0; j<numPoints; j++) {
+			p3 = poly.getPoint(j == 0 ? numPoints-1 : j-1);
+			p4 = poly.getPoint(j);
+			if (ip = LineHelper.lineIntersectLine(p1, p2, p3, p4) != null) {
+				dist = Point.distance(ip, p2);
+				if (dist > maxDist && !firstFound) {
+					maxDist = dist;
+					firstIntersection = new IntersectionPoint(p3, p4, ip);
+					firstIntersectionLineIndex = i;
 				}
-				if (dist<minDist) {
-					minDist=dist;
-					lastIntersection=new IntersectionPoint(p3,p4,ip);
-					lastIntersectionLineIndex=i-1;
+				if (dist < minDist) {
+					minDist = dist;
+					lastIntersection = new IntersectionPoint(p3, p4, ip);
+					lastIntersectionLineIndex = i-1;
 				}
 			}
 		}
-		firstFound=(firstIntersection!=null);
+		firstFound = firstIntersection != null;
 	}
-			/*
-			Alert.show(firstIntersection.toString());
-			Alert.show(lastIntersection.toString());*/
-	if ((firstIntersection!=null) && (lastIntersection!=null)) {
-		var newLine /* of Point */ = [];
-		newLine[0]=firstIntersection.intersectionPoint;
-		var j  = 1;
-		for (var i = firstIntersectionLineIndex; i<=lastIntersectionLineIndex; i++) {
+
+	if (firstIntersection != null && lastIntersection != null) {
+		newLine = [];
+		newLine[0] = firstIntersection.intersectionPoint;
+		j = 1;
+		for (i=firstIntersectionLineIndex; i<=lastIntersectionLineIndex; i++) {
 			newLine[j++] = line[i];
 		}
-		newLine[newLine.length-1]=lastIntersection.intersectionPoint;
-		if (
-			(
-				(equals(firstIntersection.polygonPoint1, lastIntersection.polygonPoint1))&&
-				(equals(firstIntersection.polygonPoint2, lastIntersection.polygonPoint2))
-			)||
-			(
-				(equals(firstIntersection.polygonPoint1, lastIntersection.polygonPoint2))&&
-				(equals(firstIntersection.polygonPoint2, lastIntersection.polygonPoint1))
-				)
-		) {
-				var poly1 = new PolySimple();
-				poly1.add(newLine);
-				var finPoly1  = poly.intersection(poly1);
-				var finPoly2  = poly.xor(poly1);
-				if ((checkPoly(finPoly1)) && (checkPoly(finPoly2))) {
-					return [finPoly1,finPoly2];
-				}
+		newLine[newLine.length-1] = lastIntersection.intersectionPoint;
+		if ((equals(firstIntersection.polygonPoint1, lastIntersection.polygonPoint1) && equals(firstIntersection.polygonPoint2, lastIntersection.polygonPoint2)) || (equals(firstIntersection.polygonPoint1, lastIntersection.polygonPoint2) && equals(firstIntersection.polygonPoint2, lastIntersection.polygonPoint1))) {
+			poly1 = new PolySimple();
+			poly1.add(newLine);
+			finPoly1  = poly.intersection(poly1);
+			finPoly2  = poly.xor(poly1);
+			if (checkPoly(finPoly1) && checkPoly(finPoly2)) return [finPoly1,finPoly2];
 		} else {
-			var points1 = iteratePoints(poly.getPoints(),firstIntersection.polygonPoint1,firstIntersection.polygonPoint2, lastIntersection.polygonPoint1, lastIntersection.polygonPoint2);
-			points1=points1.concat(newLine.reverse());
-			var points2 = iteratePoints(poly.getPoints(),firstIntersection.polygonPoint2,firstIntersection.polygonPoint1, lastIntersection.polygonPoint1, lastIntersection.polygonPoint2);
-			points2=points2.concat(newLine);
-			var poly1  = new PolySimple();
+			points1 = iteratePoints(poly.getPoints(), firstIntersection.polygonPoint1, firstIntersection.polygonPoint2, lastIntersection.polygonPoint1, lastIntersection.polygonPoint2);
+			points1 = points1.concat(newLine.reverse());
+			points2 = iteratePoints(poly.getPoints(), firstIntersection.polygonPoint2, firstIntersection.polygonPoint1, lastIntersection.polygonPoint1, lastIntersection.polygonPoint2);
+			points2 = points2.concat(newLine);
+			poly1 = new PolySimple();
 			poly1.add(points1);
-			var poly2  = new PolySimple();
+			poly2 = new PolySimple();
 			poly2.add(points2);
-			var finPoly1  = poly.intersection(poly1);
-			var finPoly2  = poly.intersection(poly2);
-			
-			if ((checkPoly(finPoly1)) && (checkPoly(finPoly2))) {
-					return [finPoly1,finPoly2];
-				}
-			}	
-		}
-		return null;	
+			finPoly1 = poly.intersection(poly1);
+			finPoly2 = poly.intersection(poly2);
+			if (checkPoly(finPoly1) && checkPoly(finPoly2)) return [finPoly1, finPoly2];
+		}	
+	}
+	return null;	
 }
 gpcas.geometry.LineIntersection.checkPoly = function(poly) {
-	var noHoles =0;
-	for (var i  = 0; i<poly.getNumInnerPoly(); i++) {
-		var innerPoly  = poly.getInnerPoly(i);
-		if (innerPoly.isHole()) {
-			return false;
-		} else {
-			noHoles++;
-		}
-		if (noHoles>1) return false;
+	var noHoles = 0,
+		innerPoly,
+		il = poly.getNumInnerPoly(),
+		i = 0;
+	for (; i<il; i++) {
+		innerPoly  = poly.getInnerPoly(i);
+		if (innerPoly.isHole()) return false;
+		else noHoles++;
+
+		if (noHoles > 1) return false;
 	}
 	return true;
 }
@@ -1609,7 +1604,7 @@ gpcas.geometry.LineIntersection.checkPoly = function(poly) {
 ///////////  LmtNode //////////////////////////
 
 gpcas.geometry.LmtNode = function(yvalue) {
-	this.y = yvalue;            /* Y coordinate at local minimum     */
+	this.y = yvalue;   /* Y coordinate at local minimum     */
 	this.first_bound;  /* Pointer to bound list             */
 	this.next;         /* Pointer to next local minimum     */
 };
@@ -1619,18 +1614,17 @@ gpcas.geometry.LmtNode = function(yvalue) {
 gpcas.geometry.LmtTable = function() {
 	this.top_node;
 };
+
 gpcas.geometry.LmtTable.prototype.print = function() {
-	var n= 0;
-	var lmt= this.top_node ;
-	while( lmt != null )
-	{
-		//console.log("lmt("+n+")");
-		for ( var edge= lmt.first_bound ; (edge != null) ; edge = edge.next_bound )
-		{
-		   //console.log("edge.vertex.x="+edge.vertex.x+"  edge.vertex.y="+edge.vertex.y);
-		}
-		n++ ;
-		lmt = lmt.next ;
+	var n = 0,
+		lmt = this.top_node,
+		edge;
+	while (lmt != null) {
+	//	for (edge=lmt.first_bound; edge != null; edge=edge.next_bound) {
+	//		console.log('edge.vertex.x='+ edge.vertex.x +'  edge.vertex.y='+ edge.vertex.y);
+	//	}
+		n++;
+		lmt = lmt.next;
 	}
 }
 
@@ -1638,10 +1632,10 @@ gpcas.geometry.LmtTable.prototype.print = function() {
 gpcas.geometry.OperationType = function(type) {
 	this.m_Type = type; 
 }
-gpcas.geometry.OperationType.GPC_DIFF= new gpcas.geometry.OperationType( "Difference" );
-gpcas.geometry.OperationType.GPC_INT= new gpcas.geometry.OperationType( "Intersection" );
-gpcas.geometry.OperationType.GPC_XOR= new gpcas.geometry.OperationType( "Exclusive or" );
-gpcas.geometry.OperationType.GPC_UNION= new gpcas.geometry.OperationType( "Union" );
+gpcas.geometry.OperationType.GPC_DIFF  = new gpcas.geometry.OperationType( 'Difference' );
+gpcas.geometry.OperationType.GPC_INT   = new gpcas.geometry.OperationType( 'Intersection' );
+gpcas.geometry.OperationType.GPC_XOR   = new gpcas.geometry.OperationType( 'Exclusive or' );
+gpcas.geometry.OperationType.GPC_UNION = new gpcas.geometry.OperationType( 'Union' );
 
 //////////// Poly  /////////////////////
 // ---> an interface
@@ -1664,33 +1658,30 @@ gpcas.geometry.OperationType.GPC_UNION= new gpcas.geometry.OperationType( "Union
  */
 gpcas.geometry.PolyDefault = function(isHole) {
 	if (isHole == null) isHole = false;
-	
-	   /**
+	/**
 	* Only applies to the first poly and can only be used with a poly that contains one poly
 	*/
-	this.m_IsHole= isHole ;
-	this.m_List= new ArrayList();
+	this.m_IsHole = isHole;
+	this.m_List = new ArrayList();
 }
- /**
-	* Return true if the given object is equal to this one.
-	*/
-gpcas.geometry.PolyDefault.prototype.equals = function ( obj) {
-	if (!(obj instanceof PolyDefault)) {
-		return false;
-	}
-	var that = obj;
 
-	if ( this.m_IsHole != that.m_IsHole ) return false ;
-	if ( !equals(this.m_List, that.m_List ) ) return false ;
-	  
+/**
+ * Return true if the given object is equal to this one.
+ */
+gpcas.geometry.PolyDefault.prototype.equals = function (obj) {
+	if (!(obj instanceof PolyDefault)) return false;
+	var that = obj;
+	if (this.m_IsHole != that.m_IsHole) return false;
+	if (!equals(this.m_List, that.m_List)) return false;
 	return true ;
 }
-   /**
-	* Return the hashCode of the object.
-	*
-	* @return an integer value that is the same for two objects
-	* whenever their internal representation is the same (equals() is true)
-	**/
+
+/**
+ * Return the hashCode of the object.
+ *
+ * @return an integer value that is the same for two objects
+ * whenever their internal representation is the same (equals() is true)
+ **/
 gpcas.geometry.PolyDefault.prototype.hashCode = function () {
 	var m_List = this.m_List;
 	
@@ -1698,460 +1689,462 @@ gpcas.geometry.PolyDefault.prototype.hashCode = function () {
 	result = 37*result + m_List.hashCode();
 	return result;
 }
-   /**
-	* Remove all of the points.  Creates an empty polygon.
-	*/
+
+/**
+ * Remove all of the points.  Creates an empty polygon.
+ */
 gpcas.geometry.PolyDefault.prototype.clear = function() {
 	this.m_List.clear();
 }
 
-gpcas.geometry.PolyDefault.prototype.add = function(arg0,arg1) {
-	var args = [];
+gpcas.geometry.PolyDefault.prototype.add = function(arg0, arg1) {
+	var args = [],
+		arr,
+		i, il;
 	
 	args[0] = arg0;
-	if (arg1) {
-		args[1] = arg1;
-	}
-	if (args.length==2) {
+	if (arg1) args[1] = arg1;
+	
+	if (args.length == 2) {
 		this.addPointXY(args[0], args[1]);
-	} else if (args.length==1) {
+	} else if (args.length == 1) {
 		if (args[0] instanceof Point) {
 			this.addPoint(args[0]);	
 		} else if (args[0] instanceof gpcas.geometry.PolySimple) {
 			this.addPoly(args[0]);
 		} else if (args[0] instanceof Array) {
-			var arr  = args[0];
-			if ((arr.length==2) && (arr[0] instanceof Number) && (arr[1] instanceof Number)) {
+			arr = args[0];
+			if (arr.length == 2 && arr[0] instanceof Number && arr[1] instanceof Number) {
 				this.add(arr[0] ,arr[1] )
 			} else {
-				for (var i=0; i<args[0].length ; i++) {
+				for (i=0, il=args[0].length; i<il; i++) {
 					this.add(args[0][i]);
 				}
 			}
 		}
 	}
 }
-   /**
-	* Add a point to the first inner polygon.
-	* <p>
-	* <b>Implementation Note:</b> If a point is added to an empty PolyDefault object,
-	* it will create an inner polygon of type <code>PolySimple</code>.
-	*/
+
+/**
+ * Add a point to the first inner polygon.
+ * <p>
+ * <b>Implementation Note:</b> If a point is added to an empty PolyDefault object,
+ * it will create an inner polygon of type <code>PolySimple</code>.
+ */
 gpcas.geometry.PolyDefault.prototype.addPointXY = function(x, y) {
-	this.addPoint(new Point( x, y ));
+	this.addPoint(new Point(x, y));
 }
-   /**
-	* Add a point to the first inner polygon.
-	* <p>
-	* <b>Implementation Note:</b> If a point is added to an empty PolyDefault object,
-	* it will create an inner polygon of type <code>PolySimple</code>.
-	*/
+
+/**
+ * Add a point to the first inner polygon.
+ * <p>
+ * <b>Implementation Note:</b> If a point is added to an empty PolyDefault object,
+ * it will create an inner polygon of type <code>PolySimple</code>.
+ */
 gpcas.geometry.PolyDefault.prototype.addPoint = function( p) {
-	
-	
 	var m_List = this.m_List;
-	
-	if ( m_List.size() == 0)
-	{
+	if (m_List.size() == 0) {
 		m_List.add(new PolySimple());
 	}
-	(m_List.get(0)).addPoint(p);
+	m_List.get(0).addPoint(p);
 }
- /**
-	* Add an inner polygon to this polygon - assumes that adding polygon does not
-	* have any inner polygons.
-	*
-	* @throws IllegalStateException if the number of inner polygons is greater than
-	* zero and this polygon was designated a hole.  This would break the assumption
-	* that only simple polygons can be holes.
-	*/
+
+/**
+ * Add an inner polygon to this polygon - assumes that adding polygon does not
+ * have any inner polygons.
+ *
+ * @throws IllegalStateException if the number of inner polygons is greater than
+ * zero and this polygon was designated a hole.  This would break the assumption
+ * that only simple polygons can be holes.
+ */
 gpcas.geometry.PolyDefault.prototype.addPoly = function( p) {
-	
-	var m_IsHole = this.m_IsHole;
-	var m_List = this.m_List;
-	
-	if ( (m_List.size() > 0) && m_IsHole )
-	  {
-		 alert("ERROR : Cannot add polys to something designated as a hole.");
-	  }
-	m_List.add( p );
+	var m_IsHole = this.m_IsHole,
+		m_List = this.m_List;
+	if (m_List.size() > 0 && m_IsHole) {
+		throw 'ERROR : Cannot add polys to something designated as a hole.';
+	}
+	m_List.add(p);
 }
-   /**
-	* Return true if the polygon is empty
-	*/
+
+/**
+ * Return true if the polygon is empty
+ */
 gpcas.geometry.PolyDefault.prototype.isEmpty = function() {
 	return this.m_List.isEmpty();
 }
- /**
-	* Returns the bounding rectangle of this polygon.
-	* <strong>WARNING</strong> Not supported on complex polygons.
-	*/
+
+/**
+ * Returns the bounding rectangle of this polygon.
+ * <strong>WARNING</strong> Not supported on complex polygons.
+ */
 gpcas.geometry.PolyDefault.prototype.getBounds = function () {
-	var m_List = this.m_List;
-	if ( m_List.size() == 0)
-	{
+	var m_List = this.m_List,
+		ip;
+	if (m_List.size() == 0) {
 		return new Rectangle();
-	}
-	else if ( m_List.size() == 1)
-	{
-		 var ip= this.getInnerPoly(0);
+	} else if (m_List.size() == 1) {
+		 ip = this.getInnerPoly(0);
 		 return ip.getBounds();
+	} else {
+		 console.log('getBounds not supported on complex poly.');
 	}
-	else
-	{
-		 console.log("getBounds not supported on complex poly.");
-	}
-}
-   /**
-	* Returns the polygon at this index.
-	*/
-gpcas.geometry.PolyDefault.prototype.getInnerPoly = function(polyIndex) {
-	  return this.m_List.get(polyIndex);
-}
-   /**
-	* Returns the number of inner polygons - inner polygons are assumed to return one here.
-	*/
-gpcas.geometry.PolyDefault.prototype.getNumInnerPoly = function() {
-	var m_List = this.m_List;
-	  return m_List.size();
-}
-   /**
-	* Return the number points of the first inner polygon
-	*/
-gpcas.geometry.PolyDefault.prototype.getNumPoints = function () {
-	return (this.m_List.get(0)).getNumPoints() ;
-}
-   
-   /**
-	* Return the X value of the point at the index in the first inner polygon
-	*/
-gpcas.geometry.PolyDefault.prototype.getX = function(index) {
-	  return (this.m_List.get(0)).getX(index) ;
-}
-gpcas.geometry.PolyDefault.prototype.getPoint = function(index) {
-		return (this.m_List.get(0)).getPoint(index) ;
-}
-   
-gpcas.geometry.PolyDefault.prototype.getPoints = function() {
-	return (this.m_List.get(0)).getPoints();
-}
-	 
-   
-gpcas.geometry.PolyDefault.prototype.isPointInside = function (point) {
-	var m_List = this.m_List;
-	if (!(m_List.get(0)).isPointInside(point)) return false;
-	
-	for (var i  = 0; i<m_List.size(); i++) {
-		var poly  = m_List.get(i);
-			if ((poly.isHole()) && (poly.isPointInside(point))) return false;
-		}
-		return true;
-}   
-	 /**
-	* Return the Y value of the point at the index in the first inner polygon
-	*/
-gpcas.geometry.PolyDefault.prototype.getY = function (index) {
-	var m_List = this.m_List;
-	  return (m_List.get(0)).getY(index) ;
-}
-   
-   /**
-	* Return true if this polygon is a hole.  Holes are assumed to be inner polygons of
-	* a more complex polygon.
-	*
-	* @throws IllegalStateException if called on a complex polygon.
-	*/
-gpcas.geometry.PolyDefault.prototype.isHole = function () {
-	var m_List = this.m_List;
-	var m_IsHole = this.m_IsHole;
-	
-	  if ( m_List.size() > 1)
-	  {
-		 alert( "Cannot call on a poly made up of more than one poly." );
-	  }
-	  return m_IsHole ;
-}
-   
-   /**
-	* Set whether or not this polygon is a hole.  Cannot be called on a complex polygon.
-	*
-	* @throws IllegalStateException if called on a complex polygon.
-	*/
-gpcas.geometry.PolyDefault.prototype.setIsHole = function(isHole) {
-	var m_List = this.m_List;
-	if ( m_List.size() > 1)
-	  {
-		 alert( "Cannot call on a poly made up of more than one poly." );
-	  }
-	this.m_IsHole = isHole ;
-}
-   
-   /**
-	* Return true if the given inner polygon is contributing to the set operation.
-	* This method should NOT be used outside the Clip algorithm.
-	*/
-gpcas.geometry.PolyDefault.prototype.isContributing = function( polyIndex) {
-	  var m_List = this.m_List;
-	  return (m_List.get(polyIndex)).isContributing(0);
-}
-   
-	/**
-	* Set whether or not this inner polygon is constributing to the set operation.
-	* This method should NOT be used outside the Clip algorithm.
-	*
-	* @throws IllegalStateException if called on a complex polygon
-	*/
-gpcas.geometry.PolyDefault.prototype.setContributing = function( polyIndex, contributes) {
-	var m_List = this.m_List;
-	if ( m_List.size() != 1)
-	  {
-		alert( "Only applies to polys of size 1" );
-	  }
-	 (m_List.get(polyIndex)).setContributing( 0, contributes );
-}
-   
-   /**
-	* Return a Poly that is the intersection of this polygon with the given polygon.
-	* The returned polygon could be complex.
-	*
-	* @return the returned Poly will be an instance of PolyDefault.
-	*/
-gpcas.geometry.PolyDefault.prototype.intersection = function(p) {
-	return Clip.intersection( p, this, "PolyDefault");
-}
-   
-   /**
-	* Return a Poly that is the union of this polygon with the given polygon.
-	* The returned polygon could be complex.
-	*
-	* @return the returned Poly will be an instance of PolyDefault.
-	*/
-gpcas.geometry.PolyDefault.prototype.union = function(p) {
-	return Clip.union( p, this, "PolyDefault");
-}
-   
-   /**
-	* Return a Poly that is the exclusive-or of this polygon with the given polygon.
-	* The returned polygon could be complex.
-	*
-	* @return the returned Poly will be an instance of PolyDefault.
-	*/
-gpcas.geometry.PolyDefault.prototype.xor = function(p) {
-	return Clip.xor( p, this, "PolyDefault" );
-}
-   
-   /**
-	* Return a Poly that is the difference of this polygon with the given polygon.
-	* The returned polygon could be complex.
-	*
-	* @return the returned Poly will be an instance of PolyDefault.
-	*/
-gpcas.geometry.PolyDefault.prototype.difference = function(p) {
-	return Clip.difference(p,this,"PolyDefault");
-}
-   
-   /**
-	* Return the area of the polygon in square units.
-	*/
-gpcas.geometry.PolyDefault.prototype.getArea = function() {
-	  var area= 0.0;
-	  for ( var i= 0; i < getNumInnerPoly() ; i++ )
-	  {
-		 var p= getInnerPoly(i);
-		 var tarea = p.getArea() * (p.isHole() ? -1.0: 1.0);
-		 area += tarea ;
-	  }
-	  return area ;
 }
 
-   // -----------------------
-   // --- Package Methods ---
-   // -----------------------
+/**
+ * Returns the polygon at this index.
+ */
+gpcas.geometry.PolyDefault.prototype.getInnerPoly = function(polyIndex) {
+	return this.m_List.get(polyIndex);
+}
+
+/**
+ * Returns the number of inner polygons - inner polygons are assumed to return one here.
+ */
+gpcas.geometry.PolyDefault.prototype.getNumInnerPoly = function() {
+	return this.m_List.size();
+}
+
+/**
+ * Return the number points of the first inner polygon
+ */
+gpcas.geometry.PolyDefault.prototype.getNumPoints = function () {
+	return this.m_List.get(0).getNumPoints();
+}
+
+/**
+ * Return the X value of the point at the index in the first inner polygon
+ */
+gpcas.geometry.PolyDefault.prototype.getX = function(index) {
+	  return this.m_List.get(0).getX(index);
+}
+
+gpcas.geometry.PolyDefault.prototype.getPoint = function(index) {
+	return this.m_List.get(0).getPoint(index);
+}
+
+gpcas.geometry.PolyDefault.prototype.getPoints = function() {
+	return this.m_List.get(0).getPoints();
+}
+
+gpcas.geometry.PolyDefault.prototype.isPointInside = function (point) {
+	var m_List = this.m_List,
+		i, il,
+		poly;
+	if (!m_List.get(0).isPointInside(point)) return false;
+	
+	for (i=0, il=m_List.size(); i<il; i++) {
+		poly = m_List.get(i);
+		if (poly.isHole() && poly.isPointInside(point)) return false;
+	}
+	return true;
+}
+
+/**
+ * Return the Y value of the point at the index in the first inner polygon
+ */
+gpcas.geometry.PolyDefault.prototype.getY = function (index) {
+	return this.m_List.get(0).getY(index) ;
+}
+
+/**
+ * Return true if this polygon is a hole.  Holes are assumed to be inner polygons of
+ * a more complex polygon.
+ *
+ * @throws IllegalStateException if called on a complex polygon.
+ */
+gpcas.geometry.PolyDefault.prototype.isHole = function () {
+	if (this.m_List.size() > 1) {
+		throw 'Cannot call on a poly made up of more than one poly.';
+	}
+	return this.m_IsHole;
+}
+   
+/**
+ * Set whether or not this polygon is a hole.  Cannot be called on a complex polygon.
+ *
+ * @throws IllegalStateException if called on a complex polygon.
+ */
+gpcas.geometry.PolyDefault.prototype.setIsHole = function(isHole) {
+	if (this.m_List.size() > 1) {
+		throw 'Cannot call on a poly made up of more than one poly.';
+	}
+	this.m_IsHole = isHole;
+}
+
+/**
+ * Return true if the given inner polygon is contributing to the set operation.
+ * This method should NOT be used outside the Clip algorithm.
+ */
+gpcas.geometry.PolyDefault.prototype.isContributing = function( polyIndex) {
+	return this.m_List.get(polyIndex).isContributing(0);
+}
+
+/**
+ * Set whether or not this inner polygon is constributing to the set operation.
+ * This method should NOT be used outside the Clip algorithm.
+ *
+ * @throws IllegalStateException if called on a complex polygon
+ */
+gpcas.geometry.PolyDefault.prototype.setContributing = function( polyIndex, contributes) {
+	if (this.m_List.size() != 1) {
+		throw 'Only applies to polys of size 1';
+	}
+	this.m_List.get(polyIndex).setContributing(0, contributes);
+}
+
+/**
+ * Return a Poly that is the intersection of this polygon with the given polygon.
+ * The returned polygon could be complex.
+ *
+ * @return the returned Poly will be an instance of PolyDefault.
+ */
+gpcas.geometry.PolyDefault.prototype.intersection = function(p) {
+	return Clip.intersection(p, this, 'PolyDefault');
+}
+
+/**
+ * Return a Poly that is the union of this polygon with the given polygon.
+ * The returned polygon could be complex.
+ *
+ * @return the returned Poly will be an instance of PolyDefault.
+ */
+gpcas.geometry.PolyDefault.prototype.union = function(p) {
+	return Clip.union( p, this, 'PolyDefault');
+}
+
+/**
+ * Return a Poly that is the exclusive-or of this polygon with the given polygon.
+ * The returned polygon could be complex.
+ *
+ * @return the returned Poly will be an instance of PolyDefault.
+ */
+gpcas.geometry.PolyDefault.prototype.xor = function(p) {
+	return Clip.xor( p, this, 'PolyDefault' );
+}
+
+/**
+ * Return a Poly that is the difference of this polygon with the given polygon.
+ * The returned polygon could be complex.
+ *
+ * @return the returned Poly will be an instance of PolyDefault.
+ */
+gpcas.geometry.PolyDefault.prototype.difference = function(p) {
+	return Clip.difference(p,this, 'PolyDefault');
+}
+
+/**
+ * Return the area of the polygon in square units.
+ */
+gpcas.geometry.PolyDefault.prototype.getArea = function() {
+	var area = 0.0,
+		il = getNumInnerPoly(),
+		i = 0,
+		p,
+		tarea;
+	for (; i<il; i++) {
+		p = getInnerPoly(i);
+		tarea = p.getArea() * (p.isHole() ? -1.0 : 1.0);
+		area += tarea;
+	}
+	return area;
+}
+
+// -----------------------
+// --- Package Methods ---
+// -----------------------
 gpcas.geometry.PolyDefault.prototype.toString = function() {
-	var res  = "";
-	var m_List = this.m_List;
-	for ( var i= 0; i < m_List.size() ; i++ )
-	{
-		 var p = this.getInnerPoly(i);
-		 res+=("InnerPoly("+i+").hole="+p.isHole());
-		 var points = [];
-		 for ( var j= 0; j < p.getNumPoints() ; j++ )
-		 {
-			points.push(new Point(p.getX(j),p.getY(j)));
-		 }
-		 points = ArrayHelper.sortPointsClockwise(points) ;
-		 
-		 for (var k =0 ; k< points.length ; k++) {
-			res+=points[k].toString();
-		 }
-		
-	  }
-	  return res;
-   }
+	var res = '',
+		points,
+		m_List = this.m_List,
+		il = m_List.size(),
+		i = 0,
+		p,
+		j, jl;
+	for (; i<il; i++) {
+		p = this.getInnerPoly(i);
+		res += 'InnerPoly('+ i +').hole='+ p.isHole();
+		points = [];
+		for (j=0, jl=p.getNumPoints(); j<jl; j++) {
+			points.push(new Point(p.getX(j), p.getY(j)));
+		}
+		points = ArrayHelper.sortPointsClockwise(points);
+		for (j=0, jl=points.length; j<jl; j++) {
+			res += points[j].toString();
+		}
+	}
+	return res;
+}
    
 ///////////////  Polygon   /////////////////////////////////
 gpcas.geometry.Polygon = function() {
-	this.maxTop ;
-	this.maxBottom ;
-	this.maxLeft ;
-	this.maxRight ;
-	this.vertices  /* of Point */;
+	this.maxTop;
+	this.maxBottom;
+	this.maxLeft;
+	this.maxRight;
+	this.vertices;
 };
+
 gpcas.geometry.Polygon.prototype.fromArray = function(v) {
+	var pointArr,
+		i = 0,
+		il = v.length;
 	this.vertices = [];
-	
-	for (var i=0 ; i<v.length ; i++) {
-		var pointArr = v[i];
+	for (; i<il; i++) {
+		pointArr = v[i];
 		this.vertices.push(new Point(pointArr[0],pointArr[1]));
 	}
 }
 
-		/*Normalize vertices in polygon to be ordered clockwise from most left point*/
+/*Normalize vertices in polygon to be ordered clockwise from most left point*/
 gpcas.geometry.Polygon.prototype.normalize = function() {
-	var maxLeftIndex ;
-	var vertices = this.vertices;
-	var newVertices = this.vertices;
+	var maxLeftIndex,
+		vertices = this.vertices,
+		newVertices = this.vertices,
+		il = vertices.length,
+		i = 0,
+		vertex,
+		j, k, kl,
+		reverse = false;
 	
-	for (var i  = 0; i<vertices.length; i++) {
-		var vertex  = vertices[i];
-		
-		if ((maxTop==null) || (maxTop.y>vertex.y) || ((maxTop.y==vertex.y) && (vertex.x<maxTop.x))) {
-			maxTop=vertex;	
-		}
-		if ((maxBottom==null) || (maxBottom.y<vertex.y) || ((maxBottom.y==vertex.y) && (vertex.x>maxBottom.x))) {
-			maxBottom=vertex;	
-		}
-		if ((maxLeft==null) || (maxLeft.x>vertex.x) || ((maxLeft.x==vertex.x) && (vertex.y>maxLeft.y))) {
-			maxLeft=vertex;
-			maxLeftIndex=i;	
+	for (; i<il; i++) {
+		vertex = vertices[i];
+		if (maxTop == null || maxTop.y > vertex.y || (maxTop.y == vertex.y && vertex.x < maxTop.x)) maxTop = vertex;	
+		if (maxBottom == null || maxBottom.y < vertex.y || (maxBottom.y == vertex.y && vertex.x > maxBottom.x)) maxBottom = vertex;	
+		if (maxRight == null || maxRight.x < vertex.x || (maxRight.x == vertex.x && vertex.y < maxRight.y)) maxRight = vertex;
+		if (maxLeft == null || maxLeft.x > vertex.x || (maxLeft.x == vertex.x && vertex.y > maxLeft.y)) {
+			maxLeft = vertex;
+			maxLeftIndex = i;	
 		} 
-		if ((maxRight==null) || (maxRight.x<vertex.x) || ((maxRight.x==vertex.x) && (vertex.y<maxRight.y))) {
-			maxRight=vertex;	
-		}
 	}
 			
-	if (maxLeftIndex>0) {
+	if (maxLeftIndex > 0) {
 		newVertices = [];
-		var j = 0;
-		for (var i=maxLeftIndex; i<vertices.length;i++) {
-			newVertices[j++]=this.vertices[i];
+		j = 0;
+		for (i=maxLeftIndex, il=vertices.length; i<il; i++) {
+			newVertices[j++] = this.vertices[i];
 		}
-		for (var i=0; i<maxLeftIndex; i++) {
-			newVertices[j++]=this.vertices[i];
+		for (i=0; i<maxLeftIndex; i++) {
+			newVertices[j++] = this.vertices[i];
 		}
-		vertices=newVertices;
+		vertices = newVertices;
 	}
-	var reverse   = false;
-	for (var k=0; k<this.vertices.length ; k++) {
-		var vertex  =  this.vertices[k];
+	
+	for (k=0, kl=this.vertices.length; k<kl; k++) {
+		vertex = this.vertices[k];
 		if (equals(vertex, maxBottom)) {
-			reverse=true;
+			reverse = true;
 			break;
 		} else if (equals(vertex, maxTop)) {
 			break;
 		} 
 	}
 	if (reverse) {
-		newVertices= [];
-		newVertices[0]=vertices[0];
-		var j =1;
-		for (var i=vertices.length-1; i>0; i--) {
-			newVertices[j++]=this.vertices[i];
+		newVertices = [];
+		newVertices[0] = vertices[0];
+		j = 1;
+		for (i=vertices.length-1; i>0; i--) {
+			newVertices[j++] = this.vertices[i];
 		}
-		vertices=newVertices;
+		vertices = newVertices;
 	}
 }
+
 gpcas.geometry.Polygon.prototype.getVertexIndex = function(vertex) {
-	for (var i=0; i<this.vertices.length; i++) {
-		if (equals(vertices[i], vertex)) {
-			return i;
-		}
+	var il = this.vertices.length,
+		i = 0;
+	for (; i<il; i++) {
+		if (equals(vertices[i], vertex)) return i;
 	}
 	return -1;
-}		
-gpcas.geometry.Polygon.prototype.insertVertex = function(vertex1,vertex2, newVertex) {
-	var vertex1Index  = getVertexIndex(vertex1);
-	var vertex2Index  = getVertexIndex(vertex2);
-	if ((vertex1Index==-1) || (vertex2Index==-1)) {
-		return false;
-	}
+}
+
+gpcas.geometry.Polygon.prototype.insertVertex = function(vertex1, vertex2, newVertex) {
+	var vertex1Index = getVertexIndex(vertex1),
+		vertex2Index = getVertexIndex(vertex2),
+		newVertices,
+		i, il;
+	if (vertex1Index == -1 || vertex2Index == -1) return false;
 	
-	if (vertex2Index<vertex1Index) {
-		var i  = vertex1Index;
-		vertex1Index=vertex2Index;
-		vertex2Index=i;
+	if (vertex2Index < vertex1Index) {
+		i = vertex1Index;
+		vertex1Index = vertex2Index;
+		vertex2Index = i;
 	}
-	if (vertex2Index==vertex1Index+1) {
-		var newVertices  = [];
-		for (var i =0; i<=vertex1Index; i++) {
-			newVertices[i]=this.vertices[i];
+	if (vertex2Index == vertex1Index + 1) {
+		newVertices = [];
+		for (i=0; i<=vertex1Index; i++) {
+			newVertices[i] = this.vertices[i];
 		}
-		newVertices[vertex2Index]=newVertex;
-		for (var i =vertex2Index; i<this.vertices.length; i++) {
-			newVertices[i+1]=this.vertices[i];
+		newVertices[vertex2Index] = newVertex;
+		for (i=vertex2Index, il=this.vertices.length; i<il; i++) {
+			newVertices[i+1] = this.vertices[i];
 		}
-		this.vertices=newVertices;
-	} else if ((vertex2Index==vertices.length-1) && (vertex1Index==0)) {
+		this.vertices = newVertices;
+	} else if (vertex2Index == vertices.length - 1 && vertex1Index == 0) {
 		this.vertices.push(newVertex);
 	}
 	return true;
 }
+
 gpcas.geometry.Polygon.prototype.clone = function() {
 	var res = new Polygon();
-	res.vertices=vertices.slice(this.vertices.length-1);
+	res.vertices = vertices.slice(this.vertices.length-1);
 	return res;
 }
+
 gpcas.geometry.Polygon.prototype.toString = function() {
-	var vertices = this.vertices;
-	var res  = "[";
-	for (var i  =0; i<vertices.length; i++) {
-		var vertex  = vertices[i];
-		res+=(i>0?",":"")+"["+vertex.x+","+vertex.y+"]";
+	var vertices = this.vertices,
+		res = '[',
+		il = vertices.length,
+		i = 0,
+		vertex;
+	for (; i<il; i++) {
+		vertex = vertices[i];
+		res += (i > 0 ? ',' : '') +'['+ vertex.x +','+ vertex.y +']';
 	}
-	res+="]";
+	res += ']';
 	return res;
 }
 
 
 ////////////////////  PolygonNode ///////////////////////////
 gpcas.geometry.PolygonNode = function(next, x, y) {
-	
+	var vn;
 
-	this.active;                 /* Active flag / vertex count        */
-	this.hole;                /* Hole / external contour flag      */
-	this.v= [] ; /* Left and right vertex list ptrs   */
-	this.next;                   /* Pointer to next polygon contour   */
-	this.proxy;                  /* Pointer to actual structure used  */
+	this.active;  /* Active flag / vertex count        */
+	this.hole;    /* Hole / external contour flag      */
+	this.v = [];  /* Left and right vertex list ptrs   */
+	this.next;    /* Pointer to next polygon contour   */
+	this.proxy;   /* Pointer to actual structure used  */
 	
 	/* Make v[Clip.LEFT] and v[Clip.RIGHT] point to new vertex */
-	var vn= new VertexNode( x, y );
-	
-	this.v[Clip.LEFT ] = vn ;
-	this.v[Clip.RIGHT] = vn ;
-	 
-	this.next = next ;
-	this.proxy = this ; /* Initialise proxy to point to p itself */
-	this.active = 1; //TRUE
+	vn = new VertexNode(x, y);
+	this.v[Clip.LEFT ] = vn;
+	this.v[Clip.RIGHT] = vn;
+	this.next = next;
+	this.proxy = this; /* Initialise proxy to point to p itself */
+	this.active = 1;
 }
-gpcas.geometry.PolygonNode.prototype.add_right = function( x, y) {
-	var nv= new VertexNode( x, y );
-	 
-	 /* Add vertex nv to the right end of the polygon's vertex list */
-	 this.proxy.v[Clip.RIGHT].next= nv;
-	 
-	 /* Update proxy->v[Clip.RIGHT] to point to nv */
-	 this.proxy.v[Clip.RIGHT]= nv;
+
+gpcas.geometry.PolygonNode.prototype.add_right = function(x, y) {
+	var nv = new VertexNode(x, y);
+
+	/* Add vertex nv to the right end of the polygon's vertex list */
+	this.proxy.v[Clip.RIGHT].next = nv;
+
+	/* Update proxy->v[Clip.RIGHT] to point to nv */
+	this.proxy.v[Clip.RIGHT] = nv;
 }
+
 gpcas.geometry.PolygonNode.prototype.add_left = function( x, y) {
-	 var proxy = this.proxy;
-	 
-	 var nv= new VertexNode( x, y );
-	 
-	 /* Add vertex nv to the left end of the polygon's vertex list */
-	 nv.next= proxy.v[Clip.LEFT];
-	 
-	 /* Update proxy->[Clip.LEFT] to point to nv */
-	 proxy.v[Clip.LEFT]= nv;
+	var proxy = this.proxy,
+		nv = new VertexNode(x, y);
+
+	/* Add vertex nv to the left end of the polygon's vertex list */
+	nv.next = proxy.v[Clip.LEFT];
+
+	/* Update proxy->[Clip.LEFT] to point to nv */
+	proxy.v[Clip.LEFT] = nv;
 }  
   
  
@@ -2182,208 +2175,203 @@ gpcas.geometry.PolySimple = function() {
 	* appears more than once in the list.
 	*/
 gpcas.geometry.PolySimple.prototype.equals = function(obj) {
-  if ( !(obj instanceof PolySimple) )
-  {
-	 return false;
-  }
-  
-  var that= obj;
-  
-  var this_num= this.m_List.size();
-  var that_num= that.m_List.size();
-  if ( this_num != that_num ) return false ;
-   
-  
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // !!! WARNING: This is not the greatest algorithm.  It fails if !!!
-  // !!! the first point in "this" poly appears more than once.    !!!
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  if ( this_num > 0)
-  {
-	 var this_x= this.getX(0);
-	 var this_y= this.getY(0);
-	 var that_first_index = -1;
-	 for ( var that_index= 0; (that_first_index == -1) && (that_index < that_num) ; that_index++ )
-	 {
-		var that_x= that.getX(that_index);
-		var that_y= that.getY(that_index);
-		if ( (this_x == that_x) && (this_y == that_y) )
-		{
-		   that_first_index = that_index ;
+	if (!(obj instanceof PolySimple)) return false;
+
+	var that = obj,
+		this_num = this.m_List.size(),
+		that_num = that.m_List.size(),
+		this_x,
+		this_y,
+		this_index,
+		that_x,
+		that_y,
+		that_index,
+		that_first_index;
+
+	if (this_num != that_num) return false;
+
+
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// !!! WARNING: This is not the greatest algorithm.  It fails if !!!
+	// !!! the first point in "this" poly appears more than once.    !!!
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	if (this_num > 0) {
+		this_x = this.getX(0);
+		this_y = this.getY(0);
+		that_first_index = -1;
+		for (that_index = 0; (that_first_index == -1) && (that_index < that_num) ; that_index++ ) {
+			that_x = that.getX(that_index);
+			that_y = that.getY(that_index);
+			if (this_x == that_x && this_y == that_y) {
+				that_first_index = that_index;
+			}
 		}
-	 }
-	 if ( that_first_index == -1) return false ;
-	 var that_index= that_first_index ;
-	 for ( var this_index= 0; this_index < this_num ; this_index++ )
-	 {
-		this_x = this.getX(this_index);
-		this_y = this.getY(this_index);
-		var that_x= that.getX(that_index);
-		var that_y= that.getY(that_index);
-		
-		if ( (this_x != that_x) || (this_y != that_y) ) return false;
-		   
-		that_index++ ;
-		if ( that_index >= that_num )
-		{
-		   that_index = 0;
+		if (that_first_index == -1) return false;
+		that_index = that_first_index;
+		for (this_index= 0; this_index < this_num; this_index++) {
+			this_x = this.getX(this_index);
+			this_y = this.getY(this_index);
+			that_x = that.getX(that_index);
+			that_y = that.getY(that_index);
+
+			if (this_x != that_x || this_y != that_y) return false;
+
+			that_index++ ;
+			if (that_index >= that_num) {
+				that_index = 0;
+			}
 		}
-	 }
-  }
-  return true ;
+	}
+	return true;
 }
-   
-   /**
-	* Return the hashCode of the object.
-	* <p>
-	* <strong>WARNING:</strong>Hash and Equals break contract.
-	*
-	* @return an integer value that is the same for two objects
-	* whenever their internal representation is the same (equals() is true)
-	*/
+
+/**
+ * Return the hashCode of the object.
+ * <p>
+ * <strong>WARNING:</strong>Hash and Equals break contract.
+ *
+ * @return an integer value that is the same for two objects
+ * whenever their internal representation is the same (equals() is true)
+ */
 gpcas.geometry.PolySimple.prototype.hashCode = function() {
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // !!! WARNING:  This hash and equals break the contract. !!!
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  var result= 17;
-  result = 37*result + this.m_List.hashCode();
-  return result;
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// !!! WARNING:  This hash and equals break the contract. !!!
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	var result = 17;
+	result = 37 * result + this.m_List.hashCode();
+	return result;
 }
-   
-   /**
-	* Return a string briefly describing the polygon.
-	*/
+
+/**
+ * Return a string briefly describing the polygon.
+ */
 gpcas.geometry.PolySimple.prototype.toString = function() {
-	return "PolySimple: num_points="+getNumPoints();
+	return 'PolySimple: num_points='+ getNumPoints();
 }
-   
-   // --------------------
-   // --- Poly Methods ---
-   // --------------------
-   /**
-	* Remove all of the points.  Creates an empty polygon.
-	*/
+
+
+// --------------------
+// --- Poly Methods ---
+// --------------------
+/**
+ * Remove all of the points.  Creates an empty polygon.
+ */
 gpcas.geometry.PolySimple.prototype.clear = function() {
-	  this.m_List.clear();
+	this.m_List.clear();
 }
    
    
 gpcas.geometry.PolySimple.prototype.add = function(arg0,arg1) {
-	var args = [];
+	var args = [],
+		val,
+		k, kl;
 	args[0] = arg0;
-	if (arg1) {
-		args[1] = arg1;
-	}
+	if (arg1) args[1] = arg1;
 	
-	if (args.length==2) {
-		this.addPointXY(args[0] , args[1] );
-	} else if (args.length==1) {
-		if (args[0] instanceof Point) {
-			   this.addPoint(args[0]);
-		} else if (args[0] instanceof Poly) {
-			   this.addPoly(args[0]);
-		} else if (args[0] instanceof Array) {
-			for (var k=0 ; k<args[0].length ; k++) {
-				var val = args[0][k];
+	if (args.length == 2) {
+		this.addPointXY(args[0], args[1]);
+	} else if (args.length == 1) {
+		if (args[0] instanceof Point) this.addPoint(args[0]);
+		else if (args[0] instanceof Poly) this.addPoly(args[0]);
+		else if (args[0] instanceof Array) {
+			for (k=0, kl=args[0].length; k<kl; k++) {
+				val = args[0][k];
 				this.add(val);
 			}
 		}
 	}
 }
-	
-   
-   /**
-	* Add a point to the first inner polygon.
-	*/
+
+
+/**
+ * Add a point to the first inner polygon.
+ */
 gpcas.geometry.PolySimple.prototype.addPointXY = function(x, y) {
-	this.addPoint( new Point( x, y ) );
+	this.addPoint(new Point(x, y));
 }
    
-   /**
-	* Add a point to the first inner polygon.
-	*/
+/**
+ * Add a point to the first inner polygon.
+ */
 gpcas.geometry.PolySimple.prototype.addPoint = function(p) {
-	  this.m_List.add( p );
+	this.m_List.add(p);
 }
    
-   /**
-	* Throws IllegalStateexception if called
-	*/
+/**
+ * Throws IllegalStateexception if called
+ */
 gpcas.geometry.PolySimple.prototype.addPoly = function(p) {
-	alert("Cannot add poly to a simple poly.");
+	throw 'Cannot add poly to a simple poly.';
 }
    
-   /**
-	* Return true if the polygon is empty
-	*/
+/**
+ * Return true if the polygon is empty
+ */
 gpcas.geometry.PolySimple.prototype.isEmpty = function() {
-	  return this.m_List.isEmpty();
+	return this.m_List.isEmpty();
 }
    
-   /**
-	* Returns the bounding rectangle of this polygon.
-	*/
+/**
+ * Returns the bounding rectangle of this polygon.
+ */
 gpcas.geometry.PolySimple.prototype.getBounds = function() {
-	  var xmin=  Number.MAX_VALUE ;
-	  var ymin=  Number.MAX_VALUE ;
-	  var xmax= -Number.MAX_VALUE ;
-	  var ymax= -Number.MAX_VALUE ;
-	  
-	  for ( var i= 0; i < this.m_List.size() ; i++ )
-	  {
-		 var x= this.getX(i);
-		 var y= this.getY(i);
-		 if ( x < xmin ) xmin = x;
-		 if ( x > xmax ) xmax = x;
-		 if ( y < ymin ) ymin = y;
-		 if ( y > ymax ) ymax = y;
-	  }
-	  
-	  return new Rectangle( xmin, ymin, (xmax-xmin), (ymax-ymin) );
-   }
-   
-   /**
-	* Returns <code>this</code> if <code>polyIndex = 0</code>, else it throws
-	* IllegalStateException.
-	*/
-gpcas.geometry.PolySimple.prototype.getInnerPoly = function(polyIndex) {
-  if ( polyIndex != 0)
-  {
-	 alert("PolySimple only has one poly");
-  }
-  return this ;
+	var xmin =  Number.MAX_VALUE,
+		ymin =  Number.MAX_VALUE,
+		xmax = -Number.MAX_VALUE,
+		ymax = -Number.MAX_VALUE,
+		il = this.m_List.size(),
+		i = 0,
+		x, u;
+	for (; i<il; i++ ) {
+		x = this.getX(i);
+		y = this.getY(i);
+		if (x < xmin) xmin = x;
+		if (x > xmax) xmax = x;
+		if (y < ymin) ymin = y;
+		if (y > ymax) ymax = y;
+	}
+	return new Rectangle(xmin, ymin, (xmax-xmin), (ymax-ymin));
 }
-   
-   /**
-	* Always returns 1.
-	*/
+
+/**
+ * Returns <code>this</code> if <code>polyIndex = 0</code>, else it throws
+ * IllegalStateException.
+ */
+gpcas.geometry.PolySimple.prototype.getInnerPoly = function(polyIndex) {
+	if (polyIndex != 0) alert('PolySimple only has one poly');
+	return this;
+}
+
+/**
+ * Always returns 1.
+ */
 gpcas.geometry.PolySimple.prototype.getNumInnerPoly = function() {
 	return 1;
 }
-   
-   /**
-	* Return the number points of the first inner polygon
-	*/
+
+/**
+ * Return the number points of the first inner polygon
+ */
 gpcas.geometry.PolySimple.prototype.getNumPoints = function() {
-	  return this.m_List.size();
+	return this.m_List.size();
 }   
 
-   /**
-	* Return the X value of the point at the index in the first inner polygon
-	*/
+/**
+ * Return the X value of the point at the index in the first inner polygon
+ */
 gpcas.geometry.PolySimple.prototype.getX = function(index) {
-	return (this.m_List.get(index)).x;
+	return this.m_List.get(index).x;
 }
-   
-   /**
-	* Return the Y value of the point at the index in the first inner polygon
-	*/
+
+/**
+ * Return the Y value of the point at the index in the first inner polygon
+ */
 gpcas.geometry.PolySimple.prototype.getY = function(index) {
-	return (this.m_List.get(index)).y;
+	return this.m_List.get(index).y;
 }
    
 gpcas.geometry.PolySimple.prototype.getPoint = function(index) {
-	return (this.m_List.get(index));
+	return this.m_List.get(index);
 }
    
 gpcas.geometry.PolySimple.prototype.getPoints = function() {
@@ -2391,163 +2379,162 @@ gpcas.geometry.PolySimple.prototype.getPoints = function() {
 }
    
 gpcas.geometry.PolySimple.prototype.isPointInside = function(point) {
-	 var points  = this.getPoints();  
-	 var j  = points.length - 1;              
-	 var oddNodes = false;              
+	var points  = this.getPoints(),
+	 	j = points.length - 1,
+	 	oddNodes = false,
+	 	il = points.length,
+	 	i = 0;
 												 
-	 for (var i  = 0; i < points.length; i++)  
-	 {                                            
-		 if (points[i].y < point.y && points[j].y >= point.y ||  
-			 points[j].y < point.y && points[i].y >= point.y)    
-		 {                                                                   
-			 if (points[i].x +                                          
-				 (point.y - points[i].y)/(points[j].y - points[i].y)*(points[j].x - points[i].x) < point.x)  
-			 {
-				 oddNodes = !oddNodes; 
+	for (; i<il; i++) {
+		 if (points[i].y < point.y && points[j].y >= point.y || points[j].y < point.y && points[i].y >= point.y) {
+			if (points[i].x + (point.y - points[i].y) / (points[j].y - points[i].y) * (points[j].x - points[i].x) < point.x) {
+				oddNodes = !oddNodes; 
 			}
-		 }
-		 j = i;
-	 }          
-	 return oddNodes;
+		}
+		j = i;
+	}          
+	return oddNodes;
 }              
-   
-   
-   /**
-	* Always returns false since PolySimples cannot be holes.
-	*/
+
+/**
+ * Always returns false since PolySimples cannot be holes.
+ */
 gpcas.geometry.PolySimple.prototype.isHole = function() {
 	  return false ;
 }
-   
-   /**
-	* Throws IllegalStateException if called.
-	*/
-gpcas.geometry.PolySimple.prototype.setIsHole =function(isHole) {
-	alert("PolySimple cannot be a hole");
+
+/**
+ * Throws IllegalStateException if called.
+ */
+gpcas.geometry.PolySimple.prototype.setIsHole = function(isHole) {
+	throw 'PolySimple cannot be a hole';
 }
    
-   /**
-	* Return true if the given inner polygon is contributing to the set operation.
-	* This method should NOT be used outside the Clip algorithm.
-	*
-	* @throws IllegalStateException if <code>polyIndex != 0</code>
-	*/
+/**
+ * Return true if the given inner polygon is contributing to the set operation.
+ * This method should NOT be used outside the Clip algorithm.
+ *
+ * @throws IllegalStateException if <code>polyIndex != 0</code>
+ */
 gpcas.geometry.PolySimple.prototype.isContributing = function(polyIndex) {
-  if ( polyIndex != 0)
-  {
-	 alert("PolySimple only has one poly");
-  }
-  return this.m_Contributes ;
+	if (polyIndex != 0) {
+		throw 'PolySimple only has one poly';
+	}
+	return this.m_Contributes ;
 }
    
-   /**
-	* Set whether or not this inner polygon is constributing to the set operation.
-	* This method should NOT be used outside the Clip algorithm.
-	*
-	* @throws IllegalStateException if <code>polyIndex != 0</code>
-	*/
+/**
+ * Set whether or not this inner polygon is constributing to the set operation.
+ * This method should NOT be used outside the Clip algorithm.
+ *
+ * @throws IllegalStateException if <code>polyIndex != 0</code>
+ */
 gpcas.geometry.PolySimple.prototype.setContributing = function( polyIndex, contributes) {
-	  if ( polyIndex != 0)
-	  {
-		 alert("PolySimple only has one poly");
-	  }
-	  this.m_Contributes = contributes ;
-   }
+	if (polyIndex != 0) {
+		throw "PolySimple only has one poly";
+	}
+	this.m_Contributes = contributes ;
+}
    
-   /**
-	* Return a Poly that is the intersection of this polygon with the given polygon.
-	* The returned polygon is simple.
-	*
-	* @return The returned Poly is of type PolySimple
-	*/
+/**
+ * Return a Poly that is the intersection of this polygon with the given polygon.
+ * The returned polygon is simple.
+ *
+ * @return The returned Poly is of type PolySimple
+ */
 gpcas.geometry.PolySimple.prototype.intersection = function(p) {
-	return Clip.intersection( this, p,"PolySimple");
+	return Clip.intersection( this, p, 'PolySimple');
 }
    
-   /**
-	* Return a Poly that is the union of this polygon with the given polygon.
-	* The returned polygon is simple.
-	*
-	* @return The returned Poly is of type PolySimple
-	*/
+/**
+ * Return a Poly that is the union of this polygon with the given polygon.
+ * The returned polygon is simple.
+ *
+ * @return The returned Poly is of type PolySimple
+ */
 gpcas.geometry.PolySimple.prototype.union = function(p) {
-	  return Clip.union( this, p, "PolySimple");
+	  return Clip.union( this, p, 'PolySimple');
 }
    
-   /**
-	* Return a Poly that is the exclusive-or of this polygon with the given polygon.
-	* The returned polygon is simple.
-	*
-	* @return The returned Poly is of type PolySimple
-	*/
+/**
+ * Return a Poly that is the exclusive-or of this polygon with the given polygon.
+ * The returned polygon is simple.
+ *
+ * @return The returned Poly is of type PolySimple
+ */
 gpcas.geometry.PolySimple.prototype.xor = function(p) {
-	return Clip.xor( p, this, "PolySimple");
+	return Clip.xor( p, this, 'PolySimple');
 }
    
-   /**
-	* Return a Poly that is the difference of this polygon with the given polygon.
-	* The returned polygon could be complex.
-	*
-	* @return the returned Poly will be an instance of PolyDefault.
-	*/
+/**
+ * Return a Poly that is the difference of this polygon with the given polygon.
+ * The returned polygon could be complex.
+ *
+ * @return the returned Poly will be an instance of PolyDefault.
+ */
 gpcas.geometry.PolySimple.prototype.difference = function(p) {
-	return Clip.difference(p,this,"PolySimple");
+	return Clip.difference(p, this, 'PolySimple');
 }
 		 
-   /**
-	* Returns the area of the polygon.
-	* <p>
-	* The algorithm for the area of a complex polygon was take from
-	* code by Joseph O'Rourke author of " Computational Geometry in C".
-	*/
+/**
+ * Returns the area of the polygon.
+ * <p>
+ * The algorithm for the area of a complex polygon was take from
+ * code by Joseph O'Rourke author of " Computational Geometry in C".
+ */
 gpcas.geometry.PolySimple.prototype.getArea = function() {
-	  if ( this.getNumPoints() < 3)
-	  {
-		 return 0.0;
-	  }
-	  var ax= this.getX(0);
-	  var ay= this.getY(0);
-	  
-	  var area= 0.0;
-	  for ( var i= 1; i < (this.getNumPoints()-1) ; i++ )
-	  {
-		 var bx= this.getX(i);
-		 var by= this.getY(i);
-		 var cx= this.getX(i+1);
-		 var cy= this.getY(i+1);
-		 var tarea= ((cx - bx)*(ay - by)) - ((ax - bx)*(cy - by));
-		 area += tarea ;
-	  }
-	  area = 0.5*Math.abs(area);
-	  return area ;
-   }
+	var ax, ay,
+		bx, by,
+		cx, cy,
+		area = 0.0,
+		tarea,
+		i, il;
+	if (this.getNumPoints() < 3) {
+		return 0.0;
+	}
+	ax = this.getX(0);
+	ay = this.getY(0);
+
+	for (i=1, il=this.getNumPoints()-1; i<il ; i++ ) {
+		bx = this.getX(i);
+		by = this.getY(i);
+		cx = this.getX(i+1);
+		cy = this.getY(i+1);
+		tarea = ((cx - bx)*(ay - by)) - ((ax - bx)*(cy - by));
+		area += tarea;
+	}
+	area = 0.5 * Math.abs(area);
+	return area;
+}
    
-  /////////////////////// Rectangle  ///////////////////
+/////////////////////// Rectangle  ///////////////////
 gpcas.geometry.Rectangle = function(_x, _y, _w, _h) {
 	this.x = _x; 
 	this.y = _y;
 	this.w = _w;
 	this.h = _h;
 }
-gpcas.geometry.Rectangle.prototype.getMaxY = function() {
-	return this.y+this.h;
-} 
-gpcas.geometry.Rectangle.prototype.getMinY = function() {
-	return this.y;
-}
-gpcas.geometry.Rectangle.prototype.getMaxX = function() {
-	return this.x+this.w;
-}
-gpcas.geometry.Rectangle.prototype.getMinX = function() {
-	return this.x;
-}
-gpcas.geometry.Rectangle.prototype.toString = function() {
-	return "["+x.toString()+" "+y.toString()+" "+w.toString()+" "+h.toString()+"]";
-}
+gpcas.geometry.Rectangle.prototype = {
+	getMaxY: function() {
+		return this.y + this.h;
+	},
+	getMinY: function() {
+		return this.y;
+	},
+	getMaxX: function() {
+		return this.x+this.w;
+	},
+	getMinX: function() {
+		return this.x;
+	},
+	toString: function() {
+		return '['+ x.toString() +' '+ y.toString() +' '+ w.toString() +' '+ h.toString() +']';
+	}
+};
 
 /////////////////// ScanBeamTree //////////////////////
 gpcas.geometry.ScanBeamTree = function(yvalue) {
-	this.y = yvalue;         /* Scanbeam node y value             */
+	this.y = yvalue;   /* Scanbeam node y value             */
 	this.less;         /* Pointer to nodes with lower y     */
 	this.more;         /* Pointer to nodes with higher y    */
 }
