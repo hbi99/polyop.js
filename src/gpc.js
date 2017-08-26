@@ -2541,35 +2541,28 @@ gpcas.geometry.ScanBeamTree = function(yvalue) {
 
 ///////////////////////// ScanBeamTreeEntries /////////////////
 gpcas.geometry.ScanBeamTreeEntries = function() {
-	this.sbt_entries=0;
+	this.sbt_entries = 0;
 	this.sb_tree;
 };
 gpcas.geometry.ScanBeamTreeEntries.prototype.build_sbt = function() {
-	var sbt= [];
- 
-	var entries= 0;
-	entries = this.inner_build_sbt( entries, sbt, this.sb_tree );
-	
-	//console.log("SBT = "+this.sbt_entries);
-	
-	if ( entries != this.sbt_entries )
-	{
-	//console.log("Something went wrong buildign sbt from tree.");
-	}	
-	return sbt ;
+	var sbt = [],
+		entries = 0;
+	entries = this.inner_build_sbt(entries, sbt, this.sb_tree);
+	// if (entries != this.sbt_entries) {
+	// 	console.log("Something went wrong buildign sbt from tree.");
+	// }
+	return sbt;
 }
 gpcas.geometry.ScanBeamTreeEntries.prototype.inner_build_sbt = function( entries, sbt, sbt_node) {
-	if ( sbt_node.less != null )
-	 {
+	if (sbt_node.less != null) {
 		entries = this.inner_build_sbt(entries, sbt, sbt_node.less);
-	 }
-	 sbt[entries]= sbt_node.y;
-	 entries++;
-	 if ( sbt_node.more != null )
-	 {
-		entries = this.inner_build_sbt(entries, sbt, sbt_node.more );
-	 }
-	 return entries ;
+	}
+	sbt[entries] = sbt_node.y;
+	entries++;
+	if (sbt_node.more != null) {
+		entries = this.inner_build_sbt(entries, sbt, sbt_node.more);
+	}
+	return entries;
 }
 
 ///////////////////////////  StNode
@@ -2579,68 +2572,72 @@ gpcas.geometry.StNode = function( edge, prev) {
 	this.xt;           /* Scanbeam top x coordinate         */
 	this.dx;           /* Change in x for a unit y increase */
 	this.prev;         /* Previous edge in sorted list      */
-	
-	this.edge = edge ;
-	 this.xb = edge.xb ;
-	 this.xt = edge.xt ;
-	 this.dx = edge.dx ;
-	 this.prev = prev ;
+	this.edge = edge;
+	this.xb = edge.xb;
+	this.xt = edge.xt;
+	this.dx = edge.dx;
+	this.prev = prev;
 }	
 
 /////////////////////   TopPolygonNode /////////////////
 gpcas.geometry.TopPolygonNode = function() {
 	this.top_node;
-}; 
-gpcas.geometry.TopPolygonNode.prototype.add_local_min = function( x, y) {
-	 var existing_min= this.top_node;
-	 this.top_node = new PolygonNode( existing_min, x, y );
+};
+
+gpcas.geometry.TopPolygonNode.prototype.add_local_min = function(x, y) {
+	 var existing_min = this.top_node;
+	 this.top_node = new PolygonNode(existing_min, x, y);
 	 return this.top_node ;
 }
-gpcas.geometry.TopPolygonNode.prototype.merge_left = function( p, q) {
- /* Label contour as a hole */
- q.proxy.hole = true ;
- var top_node = this.top_node;
- 
- if (p.proxy != q.proxy) {
-	/* Assign p's vertex list to the left end of q's list */
-	p.proxy.v[Clip.RIGHT].next= q.proxy.v[Clip.LEFT];
-	q.proxy.v[Clip.LEFT]= p.proxy.v[Clip.LEFT];
+
+gpcas.geometry.TopPolygonNode.prototype.merge_left = function(p, q) {
+	var top_node = this.top_node,
+		target,
+		node;
 	
-	/* Redirect any p.proxy references to q.proxy */
-	var target= p.proxy ;
-	for (var node= top_node; (node != null); node = node.next)
-	{
-	   if (node.proxy == target)
-	   {
-		  node.active= 0;
-		  node.proxy= q.proxy;
-	   }
+	/* Label contour as a hole */
+	q.proxy.hole = true;
+
+	if (p.proxy != q.proxy) {
+		/* Assign p's vertex list to the left end of q's list */
+		p.proxy.v[Clip.RIGHT].next = q.proxy.v[Clip.LEFT];
+		q.proxy.v[Clip.LEFT] = p.proxy.v[Clip.LEFT];
+		
+		/* Redirect any p.proxy references to q.proxy */
+		target = p.proxy;
+		for (node = top_node; node != null; node=node.next) {
+			if (node.proxy == target) {
+				node.active = 0;
+				node.proxy = q.proxy;
+			}
+		}
 	}
- }
 }
-gpcas.geometry.TopPolygonNode.prototype.merge_right = function( p, q) {
-	 var top_node = this.top_node;
-	 /* Label contour as external */
-	 q.proxy.hole = false ;
-	 
-	 if (p.proxy != q.proxy)
-	 {
+
+gpcas.geometry.TopPolygonNode.prototype.merge_right = function(p, q) {
+	var top_node = this.top_node,
+		target,
+		node;
+
+	/* Label contour as external */
+	q.proxy.hole = false ;
+	
+	if (p.proxy != q.proxy) {
 		/* Assign p's vertex list to the right end of q's list */
-		q.proxy.v[Clip.RIGHT].next= p.proxy.v[Clip.LEFT];
-		q.proxy.v[Clip.RIGHT]= p.proxy.v[Clip.RIGHT];
+		q.proxy.v[Clip.RIGHT].next = p.proxy.v[Clip.LEFT];
+		q.proxy.v[Clip.RIGHT] = p.proxy.v[Clip.RIGHT];
 		
 		/* Redirect any p->proxy references to q->proxy */
-		var target= p.proxy ;
-		for (var node = top_node ; (node != null ); node = node.next)
-		{
-		   if (node.proxy == target)
-		   {
-			  node.active = 0;
-			  node.proxy= q.proxy;
-		   }
+		target = p.proxy;
+		for (node=top_node; node != null; node = node.next) {
+			if (node.proxy == target) {
+				node.active = 0;
+				node.proxy= q.proxy;
+			}
 		}
-	 }
-  }
+	}
+}
+
 gpcas.geometry.TopPolygonNode.prototype.count_contours = function() {
 var nc= 0;
 
