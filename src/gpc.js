@@ -2392,9 +2392,9 @@ gpcas.geometry.PolySimple.prototype.isPointInside = function(point) {
 			}
 		}
 		j = i;
-	}          
+	}      
 	return oddNodes;
-}              
+}          
 
 /**
  * Always returns false since PolySimples cannot be holes.
@@ -2639,144 +2639,107 @@ gpcas.geometry.TopPolygonNode.prototype.merge_right = function(p, q) {
 }
 
 gpcas.geometry.TopPolygonNode.prototype.count_contours = function() {
-var nc= 0;
-
-for ( var polygon= this.top_node; (polygon != null) ; polygon = polygon.next)
-	 {
-		if (polygon.active != 0)
-		{
-		   /* Count the vertices in the current contour */
-		   var nv= 0;
-		   for (var v= polygon.proxy.v[Clip.LEFT]; (v != null); v = v.next)
-		   {
-			  nv++;
-		   }
-		   
-		   /* Record valid vertex counts in the active field */
-		   if (nv > 2)
-		   {
-			  polygon.active = nv;
-			  nc++;
-		   }
-		   else
-		   {
-			  /* Invalid contour: just free the heap */
-//                  VertexNode nextv = null ;
-//                  for (VertexNode v= polygon.proxy.v[Clip.LEFT]; (v != null); v = nextv)
-//                  {
-//                     nextv= v.next;
-//                     v = null ;
-//                  }
-			  polygon.active= 0;
-		   }
+	var nc = 0,
+		nv,
+		polygon = this.top_node,
+		v;
+	for (; polygon != null; polygon = polygon.next) {
+		if (polygon.active != 0) {
+			/* Count the vertices in the current contour */
+			nv = 0;
+			v = polygon.proxy.v[Clip.LEFT];
+			for (; v != null; v = v.next) {
+				nv++;
+			}
+			/* Record valid vertex counts in the active field */
+			if (nv > 2) {
+				polygon.active = nv;
+				nc++;
+			} else {
+				polygon.active = 0;
+			}
 		}
-	 }
-	 return nc;
-  }
+	}	
+	return nc;
+}
+
 gpcas.geometry.TopPolygonNode.prototype.getResult = function(polyClass) {
+	var top_node = this.top_node,
+		result = Clip.createNewPoly(polyClass),
+		num_contours = this.count_contours(),
+		npoly_node,
+		poly_node,
+		poly,
+		c, i, il,
+		vtx,
+		orig,
+		inner;
 
-var top_node = this.top_node;
-var result= Clip.createNewPoly( polyClass );
-//console.log(polyClass);
-
-
-var num_contours = this.count_contours();
-
-if (num_contours > 0)
-	 {
-		var c= 0;
-		var npoly_node= null ;
-		for (var poly_node= top_node; (poly_node != null); poly_node = npoly_node)
-		{
+	if (num_contours > 0) {
+		c = 0;
+		npoly_node = null;
+		for (poly_node=top_node; poly_node != null; poly_node=npoly_node) {
 		   npoly_node = poly_node.next;
-		   if (poly_node.active != 0)
-		   {
-			  
-			  var poly = result ;
-			  
-			  
-			  if ( num_contours > 1)
-			  {
-				 poly = Clip.createNewPoly( polyClass );
-			  }
-			  if ( poly_node.proxy.hole )
-			  {
-				 poly.setIsHole( poly_node.proxy.hole );
-			  }
-			  
-			  // ------------------------------------------------------------------------
-			  // --- This algorithm puts the verticies into the poly in reverse order ---
-			  // ------------------------------------------------------------------------
-			  for (var vtx= poly_node.proxy.v[Clip.LEFT]; (vtx != null) ; vtx = vtx.next )
-			  {
-				 poly.add( vtx.x, vtx.y );
-			  }
-			  if ( num_contours > 1)
-			  {
-				 result.addPoly( poly );
-			  }
-			  c++;
-		   }
+		   if (poly_node.active != 0) {
+				poly = result;
+				if (num_contours > 1) {
+					poly = Clip.createNewPoly(polyClass);
+				}
+				if (poly_node.proxy.hole) {
+					poly.setIsHole(poly_node.proxy.hole);
+				}
+				// This algorithm puts the verticies into the poly in reverse order
+				for (vtx=poly_node.proxy.v[Clip.LEFT]; vtx != null ; vtx=vtx.next) {
+					poly.add(vtx.x, vtx.y);
+				}
+				if (num_contours > 1) {
+					result.addPoly(poly);
+				}
+				c++;
+			}
 		}
-		
-		// -----------------------------------------
-		// --- Sort holes to the end of the list ---
-		// -----------------------------------------
-		var orig= result ;
-		result = Clip.createNewPoly( polyClass );
-		for ( var i= 0; i < orig.getNumInnerPoly() ; i++ )
-		{
-		   var inner= orig.getInnerPoly(i);
-		   if ( !inner.isHole() )
-		   {
-			  result.addPoly(inner);
-		   }
+		// Sort holes to the end of the list
+		orig = result;
+		result = Clip.createNewPoly(polyClass);
+		for (i=0, il=orig.getNumInnerPoly(); i<il; i++) {
+			inner = orig.getInnerPoly(i);
+			if (!inner.isHole()) result.addPoly(inner);
 		}
-		for ( var i= 0; i < orig.getNumInnerPoly() ; i++ )
-		{
-		   var inner= orig.getInnerPoly(i);
-		   if ( inner.isHole() )
-		   {
-			  result.addPoly(inner);
-		   }
+		for (i= 0, il=orig.getNumInnerPoly(); i<il; i++) {
+			inner = orig.getInnerPoly(i);
+			if (inner.isHole()) result.addPoly(inner);
 		}
-	 }
-	 return result ;
-  }
+	}
+	return result;
+}
+
 gpcas.geometry.TopPolygonNode.prototype.print = function() {
-	//console.log("---- out_poly ----");
-	var top_node = this.top_node;
-	var c= 0;
-	var npoly_node= null ;
-	for (var poly_node= top_node; (poly_node != null); poly_node = npoly_node)
-	 {
-		//console.log("contour="+c+"  active="+poly_node.active+"  hole="+poly_node.proxy.hole);
+	var top_node = this.top_node,
+		c = 0,
+		npoly_node = null,
+		poly_node,
+		v,
+		vtx;
+	for (poly_node=top_node; poly_node != null; poly_node=npoly_node) {
 		npoly_node = poly_node.next;
-		if (poly_node.active != 0)
-		{
-		   var v=0;
-		   for (var vtx= poly_node.proxy.v[Clip.LEFT]; (vtx != null) ; vtx = vtx.next )
-		   {
-			  //console.log("v="+v+"  vtx.x="+vtx.x+"  vtx.y="+vtx.y);
-		   }
-		   c++;
+		if (poly_node.active != 0) {
+			v = 0;
+			c++;
 		}
-	 }
-}   
+	}
+}
   
-  ///////////    VertexNode  ///////////////
-gpcas.geometry.VertexNode = function( x, y) {
-	this.x;    // X coordinate component
-	this.y;    // Y coordinate component
-	this.next; // Pointer to next vertex in list
-	
-	this.x = x ;
-	this.y = y ;
-	this.next = null ;
-}    
+///////////    VertexNode  ///////////////
+gpcas.geometry.VertexNode = function(x, y) {
+	this.x = x;       // X coordinate component
+	this.y = y;       // Y coordinate component
+	this.next = null; // Pointer to next vertex in list
+}
 
 /////////////   VertexType   /////////////
-gpcas.geometry.VertexType = function() {};
+gpcas.geometry.VertexType = function() {
+
+};
 gpcas.geometry.VertexType.NUL =  0; /* Empty non-intersection            */
 gpcas.geometry.VertexType.EMX =  1; /* External maximum                  */
 gpcas.geometry.VertexType.ELI =  2; /* External left intermediate        */
@@ -2793,16 +2756,14 @@ gpcas.geometry.VertexType.BED = 12; /* Bottom edge                       */
 gpcas.geometry.VertexType.IRI = 13; /* Internal right intermediate       */
 gpcas.geometry.VertexType.IMX = 14; /* Internal maximum                  */
 gpcas.geometry.VertexType.FUL = 15; /* Full non-intersection             */ 
-gpcas.geometry.VertexType.getType = function( tr, tl ,br ,bl) {
+gpcas.geometry.VertexType.getType = function(tr, tl ,br ,bl) {
 	return tr + (tl << 1) + (br << 2) + (bl << 3);
 }   
 	  
 ////////////////// WeilerAtherton  /////////////
 gpcas.geometry.WeilerAtherton = function() {};
 
-gpcas.geometry.WeilerAtherton.prototype.merge = function(p1,p2) {
-	p1=p1.clone();
-	p2=p2.clone();		
+gpcas.geometry.WeilerAtherton.prototype.merge = function(p1, p2) {
+	p1 = p1.clone();
+	p2 = p2.clone();
 }
-
-	  
