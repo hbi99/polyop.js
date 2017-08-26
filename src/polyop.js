@@ -6,7 +6,6 @@
 	var GEOMETRY = {};
 
 	@@include('util.js')
-	@@include('gpc.js')
 	@@include('geometry.clip.js')
 	@@include('geometry.aeTree.js')
 	@@include('geometry.bundleState.js')
@@ -19,5 +18,19 @@
 	@@include('geometry.line.js')
 	@@include('geometry.lineHelper.js')
 	@@include('geometry.lineIntersection.js')
+	@@include('geometry.lmtNode.js')
+	@@include('geometry.lmtTable.js')
+	@@include('geometry.operationType.js')
+	@@include('geometry.polyDefault.js')
+	@@include('geometry.polygon.js')
+	@@include('geometry.polygonNode.js')
+	@@include('geometry.polySimple.js')
+	@@include('geometry.rectangle.js')
+	@@include('geometry.topPolygonNode.js')
+	@@include('geometry.scanBeamTree.js')
+	@@include('geometry.stNode.js')
+	@@include('geometry.vertexNode.js')
+	@@include('geometry.vertexType.js')
+	@@include('geometry.weilerAtherton.js')
 
 //})();
