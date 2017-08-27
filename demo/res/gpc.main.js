@@ -112,9 +112,9 @@ var xor = function(e) {
 	drawPoly(diff,"green",0,150);
 }
 var createPoly = function(points) {
-    var res  = new PolyDefault();
+    var res  = new polyop.PolyDefault();
     for(var i=0; i < points.length; i++) {    
-        res.addPoint(new Point(points[i][0],points[i][1]));
+        res.addPoint(new polyop.Point(points[i][0],points[i][1]));
     }
     return res;
 }
@@ -139,8 +139,8 @@ var drawPoly = function(polygon,strokeColor,ox,oy) {
 		var poly = polygon.getInnerPoly(i);
 		var vertices  = getPolygonVertices(poly);
 
-		if(i==0)	drawSinglePoly(vertices,strokeColor,poly.isHole(),ox,oy);
-		else 	drawSinglePoly(vertices,colors[i%num],poly.isHole(),ox,oy);
+		if(i==0) drawSinglePoly(vertices,strokeColor,poly.isHole(),ox,oy);
+		else drawSinglePoly(vertices,colors[i%num],poly.isHole(),ox,oy);
 		
 	}
 	
@@ -149,11 +149,11 @@ var drawPoly = function(polygon,strokeColor,ox,oy) {
 var drawSinglePoly = function(vertices,strokeColor,hole,ox,oy) {
 	var i;
 	
-	if(ox==undefined)	ox = 0;
-	if(oy==undefined)	oy = 0;
+	if(ox == undefined) ox = 0;
+	if(oy == undefined) oy = 0;
 	
 	context.beginPath();
-   context.moveTo(vertices[0][0]+ox, vertices[0][1]+oy);
+	context.moveTo(vertices[0][0]+ox, vertices[0][1]+oy);
    
 	for(i=1;i<vertices.length;i++) {
 		context.lineTo(vertices[i][0]+ox, vertices[i][1]+oy);	

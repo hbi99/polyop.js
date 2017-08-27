@@ -186,7 +186,6 @@ var ArrayHelper = {
 			vertices = vertices.toArray();
 			isArrayList = true;
 		}
-
 		for (i=0, il=vertices.length; i<il; i++) {
 			vertex  = vertices[i] ;
 			if ((maxTop === null || maxTop.y > vertex.y) || (maxTop.y === vertex.y && vertex.x < maxTop.x)) maxTop = vertex;
@@ -197,7 +196,6 @@ var ArrayHelper = {
 				maxLeftIndex = i;
 			}
 		}
-
 		if (maxLeftIndex > 0) {
 			newVertices = []
 			j = 0;
@@ -209,7 +207,6 @@ var ArrayHelper = {
 			}
 			vertices = newVertices;
 		}
-
 		reverse = false;
 		for (i=0, il=vertices.length; i<il; i++) {
 			vertex = vertices[i];
@@ -269,3 +266,15 @@ ArrayList.prototype = {
 		return this._array;
 	}
 };
+
+// publish to polyDefault;
+polyop.Point       = Point;
+polyop.Line        = Line;
+polyop.Rectangle   = Rectangle;
+polyop.EdgeNode    = EdgeNode;
+polyop.ItNode      = ItNode;
+polyop.LmtNode     = LmtNode;
+polyop.StNode      = StNode;
+polyop.VertexNode  = VertexNode;
+polyop.ArrayList   = ArrayList;
+polyop.ArrayHelper = ArrayHelper;

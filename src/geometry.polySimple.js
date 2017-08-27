@@ -131,7 +131,7 @@ PolySimple.prototype = {
 			ymax = -Number.MAX_VALUE,
 			il = this.m_List.size(),
 			i = 0,
-			x, u;
+			x, y, u;
 		for (; i<il; i++ ) {
 			x = this.getX(i);
 			y = this.getY(i);

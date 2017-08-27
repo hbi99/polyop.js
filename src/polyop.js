@@ -1,6 +1,6 @@
 
-//(function() {
-//	'use strict';
+(function() {
+	'use strict';
 
 	var polyop = {};
 
@@ -22,4 +22,6 @@
 	@@include('geometry.topPolygonNode.js')
 	@@include('geometry.scanBeamTree.js')
 
-//})();
+	window.polyop = polyop;
+
+})();

@@ -21,6 +21,9 @@ var PolyDefault = function(isHole) {
 	this.m_List = new ArrayList();
 };
 
+// publish to polyDefault;
+polyop.PolyDefault = PolyDefault;
+
 PolyDefault.prototype = {
 	equals: function (obj) {
 		// Return true if the given object is equal to this one.
@@ -282,4 +285,3 @@ PolyDefault.prototype = {
 		return res;
 	}
 };
-

@@ -102,6 +102,7 @@ var Clip = {
 			edge,
 			prev_edge,
 			next_edge,
+			succ_edge,
 			ne_type,
 			ne_type_opp,
 			horiz,
