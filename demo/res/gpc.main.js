@@ -1,26 +1,26 @@
 //define classes for GPC
 var PolyDefault = GEOMETRY.PolyDefault;
-var ArrayList = UTIL.ArrayList;
+//var ArrayList = UTIL.ArrayList;
 var PolySimple = GEOMETRY.PolySimple;
 var Clip = GEOMETRY.Clip;
-var OperationType = GEOMETRY.OperationType;
+//var OperationType = GEOMETRY.OperationType;
 var LmtTable = GEOMETRY.LmtTable;
 var ScanBeamTreeEntries = GEOMETRY.ScanBeamTreeEntries;
 var EdgeTable = GEOMETRY.EdgeTable;
 var EdgeNode = GEOMETRY.EdgeNode;
 var ScanBeamTree = GEOMETRY.ScanBeamTree;
-var Rectangle = GEOMETRY.Rectangle;
+//var Rectangle = GEOMETRY.Rectangle;
 var BundleState = GEOMETRY.BundleState;
 var LmtNode = GEOMETRY.LmtNode;
 var TopPolygonNode = GEOMETRY.TopPolygonNode;
 var AetTree = GEOMETRY.AetTree;
 var HState = GEOMETRY.HState;
-var VertexType = GEOMETRY.VertexType;
-var VertexNode = GEOMETRY.VertexNode;
+//var VertexType = GEOMETRY.VertexType;
+//var VertexNode = GEOMETRY.VertexNode;
 var PolygonNode = GEOMETRY.PolygonNode;
 var ItNodeTable = GEOMETRY.ItNodeTable;
-var StNode = GEOMETRY.StNode;
-var ItNode = GEOMETRY.ItNode;
+//var StNode = GEOMETRY.StNode;
+//var ItNode = GEOMETRY.ItNode;
 ////
 
 

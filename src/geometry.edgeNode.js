@@ -1,5 +1,5 @@
 
-/////////////// EdgeNode ////////////////////////////
+// EdgeNode
 GEOMETRY.EdgeNode = function() {
 	this.vertex = new Point(); /* Piggy-backed contour vertex data  */
 	this.bot = new Point();    /* Edge lower (x, y) coordinate      */

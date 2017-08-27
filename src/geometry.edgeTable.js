@@ -1,6 +1,6 @@
 
 
-////////////////   EdgeTable /////////////////////////////////////////
+// edgeTable
 GEOMETRY.EdgeTable = function() {
 	this.m_List = new ArrayList();
 };

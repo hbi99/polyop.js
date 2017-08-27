@@ -1,5 +1,4 @@
 
-/////////////// PolyDefault  /////////////////////
 /**
  * <code>PolyDefault</code> is a default <code>Poly</code> implementation.  
  * It provides support for both complex and simple polygons.  A <i>complex polygon</i> 
@@ -14,11 +13,10 @@
  *
  * @author  Dan Bridenbecker, Solution Engineering, Inc.
  */
+
 GEOMETRY.PolyDefault = function(isHole) {
 	if (isHole == null) isHole = false;
-	/**
-	* Only applies to the first poly and can only be used with a poly that contains one poly
-	*/
+	// Only applies to the first poly and can only be used with a poly that contains one poly
 	this.m_IsHole = isHole;
 	this.m_List = new ArrayList();
 };
@@ -26,9 +24,7 @@ GEOMETRY.PolyDefault = function(isHole) {
 
 GEOMETRY.PolyDefault.prototype = {
 	equals: function (obj) {
-		/**
-		 * Return true if the given object is equal to this one.
-		 */
+		// Return true if the given object is equal to this one.
 		if (!(obj instanceof PolyDefault)) return false;
 		var that = obj;
 		if (this.m_IsHole != that.m_IsHole) return false;
@@ -45,9 +41,7 @@ GEOMETRY.PolyDefault.prototype = {
 		return 37 * 17 + this.m_List.hashCode();
 	},
 	clear: function() {
-		/**
-		 * Remove all of the points.  Creates an empty polygon.
-		 */
+		// Remove all of the points.  Creates an empty polygon.
 		this.m_List.clear();
 	},
 	add: function(arg0, arg1) {
@@ -116,9 +110,7 @@ GEOMETRY.PolyDefault.prototype = {
 		m_List.add(p);
 	},
 	isEmpty: function() {
-		/**
-		 * Return true if the polygon is empty
-		 */
+		// Return true if the polygon is empty
 		return this.m_List.isEmpty();
 	},
 	getBounds: function () {
@@ -138,27 +130,19 @@ GEOMETRY.PolyDefault.prototype = {
 		}
 	},
 	getInnerPoly: function(polyIndex) {
-		/**
-		 * Returns the polygon at this index.
-		 */
+		// Returns the polygon at this index.
 		return this.m_List.get(polyIndex);
 	},
 	getNumInnerPoly: function() {
-		/**
-		 * Returns the number of inner polygons - inner polygons are assumed to return one here.
-		 */
+		// Returns the number of inner polygons - inner polygons are assumed to return one here.
 		return this.m_List.size();
 	},
 	getNumPoints: function () {
-		/**
-		 * Return the number points of the first inner polygon
-		 */
+		// Return the number points of the first inner polygon
 		return this.m_List.get(0).getNumPoints();
 	},
 	getX: function(index) {
-		/**
-		 * Return the X value of the point at the index in the first inner polygon
-		 */
+		// Return the X value of the point at the index in the first inner polygon
 		return this.m_List.get(0).getX(index);
 	},
 	getPoint: function(index) {
@@ -180,9 +164,7 @@ GEOMETRY.PolyDefault.prototype = {
 		return true;
 	},
 	getY: function (index) {
-		/**
-		 * Return the Y value of the point at the index in the first inner polygon
-		 */
+		// Return the Y value of the point at the index in the first inner polygon
 		return this.m_List.get(0).getY(index) ;
 	},
 	isHole: function () {
@@ -264,9 +246,7 @@ GEOMETRY.PolyDefault.prototype = {
 		return Clip.difference(p,this, 'PolyDefault');
 	},
 	getArea: function() {
-		/**
-		 * Return the area of the polygon in square units.
-		 */
+		// Return the area of the polygon in square units.
 		var area = 0.0,
 			il = getNumInnerPoly(),
 			i = 0,

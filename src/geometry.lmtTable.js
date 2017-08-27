@@ -1,6 +1,5 @@
 
-////////////// LmtTable ///////////////
-
+// LmtTable
 GEOMETRY.LmtTable = function() {
 	this.top_node;
 };

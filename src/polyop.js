@@ -13,9 +13,7 @@
 	@@include('geometry.edgeTable.js')
 	@@include('geometry.hState.js')
 	@@include('geometry.IntersectionPoint.js')
-	@@include('geometry.itNode.js')
 	@@include('geometry.itNodeTable.js')
-	@@include('geometry.line.js')
 	@@include('geometry.lineHelper.js')
 	@@include('geometry.lineIntersection.js')
 	@@include('geometry.lmtNode.js')
@@ -25,12 +23,7 @@
 	@@include('geometry.polygon.js')
 	@@include('geometry.polygonNode.js')
 	@@include('geometry.polySimple.js')
-	@@include('geometry.rectangle.js')
 	@@include('geometry.topPolygonNode.js')
 	@@include('geometry.scanBeamTree.js')
-	@@include('geometry.stNode.js')
-	@@include('geometry.vertexNode.js')
-	@@include('geometry.vertexType.js')
-	@@include('geometry.weilerAtherton.js')
 
 //})();
