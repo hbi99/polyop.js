@@ -1,35 +1,11 @@
-//define classes for GPC
-//var PolyDefault = GEOMETRY.PolyDefault;
-//var ArrayList = UTIL.ArrayList;
-//var PolySimple = GEOMETRY.PolySimple;
-//var Clip = GEOMETRY.Clip;
-//var OperationType = GEOMETRY.OperationType;
-//var LmtTable = GEOMETRY.LmtTable;
-//var ScanBeamTreeEntries = GEOMETRY.ScanBeamTreeEntries;
-//var EdgeTable = GEOMETRY.EdgeTable;
-//var EdgeNode = GEOMETRY.EdgeNode;
-//var ScanBeamTree = GEOMETRY.ScanBeamTree;
-//var Rectangle = GEOMETRY.Rectangle;
-//var BundleState = GEOMETRY.BundleState;
-//var LmtNode = GEOMETRY.LmtNode;
-//var TopPolygonNode = GEOMETRY.TopPolygonNode;
-//var AetTree = GEOMETRY.AetTree;
-//var HState = GEOMETRY.HState;
-//var VertexType = GEOMETRY.VertexType;
-//var VertexNode = GEOMETRY.VertexNode;
-//var PolygonNode = GEOMETRY.PolygonNode;
-//var ItNodeTable = GEOMETRY.ItNodeTable;
-//var StNode = GEOMETRY.StNode;
-//var ItNode = GEOMETRY.ItNode;
-////
 
+var poly1,
+	poly2,
+	ctx;
 
-
-var poly1, poly2;
-var context;
 var init = function() {
-	var canvas = document.getElementById("canvas");
-	context = canvas.getContext("2d");
+	var cvs = document.getElementById("canvas");
+	ctx = cvs.getContext("2d");
 	
 	//define polygons
 	var vertices1 = [
@@ -77,57 +53,63 @@ var init = function() {
 var difference = function(e) {
 	clearScreen();
 	
-	drawPoly(poly1,"blue",0,-8);
-	drawPoly(poly2,"red",0,-8);
+	drawPoly(poly1, "blue", 0, -8);
+	drawPoly(poly2, "red", 0, -8);
 		
 	var diff = poly1.difference(poly2);
-	drawPoly(diff,"green",0,150);
+	drawPoly(diff, "green", 0, 150);
 	
 }
+
 var intersection = function(e) {
 	clearScreen();
 	
-	drawPoly(poly1,"blue",0,-8);
-	drawPoly(poly2,"red",0,-8);
+	drawPoly(poly1, "blue", 0, -8);
+	drawPoly(poly2, "red", 0, -8);
 		
 	var diff = poly1.intersection(poly2);
-	drawPoly(diff,"green",0,150);
+	drawPoly(diff, "green", 0, 150);
 }
+
 var union = function(e) {
 	clearScreen();
 	
-	drawPoly(poly1,"blue",0,-8);
-	drawPoly(poly2,"red",0,-8);
+	drawPoly(poly1, "blue", 0, -8);
+	drawPoly(poly2, "red", 0, -8);
 		
 	var diff = poly1.union(poly2);
-	drawPoly(diff,"green",0,150);
+	drawPoly(diff, "green", 0, 150);
 }
+
 var xor = function(e) {
 	clearScreen();
 	
-	drawPoly(poly1,"blue",0,-8);
-	drawPoly(poly2,"red",0,-8);
+	drawPoly(poly1, "blue", 0, -8);
+	drawPoly(poly2, "red", 0, -8);
 		
 	var diff = poly1.xor	(poly2);
-	drawPoly(diff,"green",0,150);
+	drawPoly(diff, "green", 0, 150);
 }
+
 var createPoly = function(points) {
     var res  = new polyop.PolyDefault();
     for(var i=0; i < points.length; i++) {    
-        res.addPoint(new polyop.Point(points[i][0],points[i][1]));
+        res.addPoint(new polyop.Point(points[i][0], points[i][1]));
     }
     return res;
 }
+
 var getPolygonVertices = function(poly) {
-	var vertices=[];
-	var numPoints = poly.getNumPoints();
-	var i;
+	var vertices = [];
+		numPoints = poly.getNumPoints();
+		i;
 	
-	for(i=0;i<numPoints;i++) {
-		vertices.push([poly.getX(i) , poly.getY(i)]);
+	for(i=0; i<numPoints; i++) {
+		vertices.push([poly.getX(i), poly.getY(i)]);
 	}
 	return vertices;
 }
+
 var drawPoly = function(polygon,strokeColor,ox,oy) {
 	var num = polygon.getNumInnerPoly();
 	var i;
@@ -139,38 +121,36 @@ var drawPoly = function(polygon,strokeColor,ox,oy) {
 		var poly = polygon.getInnerPoly(i);
 		var vertices  = getPolygonVertices(poly);
 
-		if(i==0) drawSinglePoly(vertices,strokeColor,poly.isHole(),ox,oy);
+		if (i==0) drawSinglePoly(vertices,strokeColor,poly.isHole(),ox,oy);
 		else drawSinglePoly(vertices,colors[i%num],poly.isHole(),ox,oy);
-		
 	}
-	
-	
 }
+	
 var drawSinglePoly = function(vertices,strokeColor,hole,ox,oy) {
 	var i;
-	
-	if(ox == undefined) ox = 0;
-	if(oy == undefined) oy = 0;
-	
-	context.beginPath();
-	context.moveTo(vertices[0][0]+ox, vertices[0][1]+oy);
-   
+
+	if (ox == undefined) ox = 0;
+	if (oy == undefined) oy = 0;
+
+	ctx.beginPath();
+	ctx.moveTo(vertices[0][0]+ox, vertices[0][1]+oy);
+
 	for(i=1;i<vertices.length;i++) {
-		context.lineTo(vertices[i][0]+ox, vertices[i][1]+oy);	
+		ctx.lineTo(vertices[i][0]+ox, vertices[i][1]+oy);	
 	}
-	
-	
-	context.lineWidth = 2;
-	context.strokeStyle = strokeColor;
-	context.fillStyle = "rgba(255, 0, 0, 0.1)";
-	
-	if(hole==true) {
-		context.fillStyle = "#ffffff";
+
+	ctx.lineWidth = 2;
+	ctx.strokeStyle = strokeColor;
+	ctx.fillStyle = "rgba(255, 0, 0, 0.1)";
+
+	if (hole == true) {
+		ctx.fillStyle = "#ffffff";
 	}
-   context.closePath();
-	context.stroke();
-	context.fill();
+	ctx.closePath();
+	ctx.stroke();
+	ctx.fill();
 }
+
 var clearScreen = function() {
-	context.clearRect (0,0,400,400);
+	ctx.clearRect (0,0,400,400);
 }
