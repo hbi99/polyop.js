@@ -2,8 +2,7 @@
 //(function() {
 //	'use strict';
 
-	var UTIL = {};
-	var GEOMETRY = {};
+	var polyop = {};
 
 	@@include('util.js')
 	@@include('geometry.clip.js')

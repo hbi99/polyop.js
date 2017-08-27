@@ -128,9 +128,7 @@ var VertexType = {
 	}
 };
 
-
-
-function equals(x1, x) {
+var equals = function(x1, x) {
 	var p;
 	for (p in x1) {
 		if (typeof(x[p]) === 'undefined') return false;
@@ -155,7 +153,7 @@ function equals(x1, x) {
 		if (typeof(x1[p]) === 'undefined') return false;
 	}
 	return true;
-}
+};
 
 // ArrayHelper
 var ArrayHelper = {
