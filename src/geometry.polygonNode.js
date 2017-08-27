@@ -1,6 +1,6 @@
 
 // PolygonNode
-GEOMETRY.PolygonNode = function(next, x, y) {
+var PolygonNode = function(next, x, y) {
 	var vn = new VertexNode(x, y);
 	this.v = [];             // Left and right vertex list ptrs
 	this.v[Clip.LEFT] = vn;  // Make v[Clip.LEFT] point to new vertex
@@ -11,7 +11,7 @@ GEOMETRY.PolygonNode = function(next, x, y) {
 	this.hole;    		     // Hole / external contour flag
 };
 
-GEOMETRY.PolygonNode.prototype = {
+PolygonNode.prototype = {
 	add_right: function(x, y) {
 		var nv = new VertexNode(x, y);
 		this.proxy.v[Clip.RIGHT].next = nv; // Add vertex nv to the right end of the polygon's vertex list

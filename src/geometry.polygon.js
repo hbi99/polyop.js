@@ -1,6 +1,6 @@
 
-///////////////  Polygon   /////////////////////////////////
-GEOMETRY.Polygon = function() {
+// Polygon
+var Polygon = function() {
 	this.maxTop;
 	this.maxBottom;
 	this.maxLeft;
@@ -8,7 +8,7 @@ GEOMETRY.Polygon = function() {
 	this.vertices;
 };
 
-GEOMETRY.Polygon.prototype = {
+Polygon.prototype = {
 	fromArray: function(v) {
 		var pointArr,
 			i = 0,

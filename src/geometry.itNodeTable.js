@@ -1,10 +1,10 @@
 
 // ItNodeTable
-GEOMETRY.ItNodeTable = function() {
+var ItNodeTable = function() {
 	this.top_node;
 }
 
-GEOMETRY.ItNodeTable.prototype.build_intersection_table = function(aet, dy) {
+ItNodeTable.prototype.build_intersection_table = function(aet, dy) {
 	var st = null,
 		edge;
 	/* Process each AET edge */

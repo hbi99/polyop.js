@@ -1,4 +1,21 @@
 
+// HState
+var NH = 0,
+	BH = 1,
+	TH = 2,
+	HState = {
+		NH: NH, /* No horizontal edge                */
+		BH: BH, /* Bottom horizontal edge            */
+		TH: TH, /* Top horizontal edge               */
+		next_h_state: [
+		  /*        ABOVE     BELOW     CROSS */
+		  /*        L   R     L   R     L   R */  
+		  /* NH */ [BH, TH,   TH, BH,   NH, NH],
+		  /* BH */ [NH, NH,   NH, NH,   TH, TH],
+		  /* TH */ [NH, NH,   NH, NH,   BH, BH]
+		]
+	};
+
 // Point
 function Point(x, y) {
 	this.x = x;
@@ -36,6 +53,26 @@ Rectangle.prototype = {
 	}
 };
 
+// EdgeNode
+var EdgeNode = function() {
+	this.bundle = ArrayHelper.create2DArray(2, 2); // Bundle edge flags
+	this.vertex = new Point(); // Piggy-backed contour vertex data
+	this.bot = new Point();    // Edge lower (x, y) coordinate
+	this.top = new Point();    // Edge upper (x, y) coordinate
+	this.xb;                   // Scanbeam bottom x coordinate
+	this.xt;                   // Scanbeam top x coordinate
+	this.dx;                   // Change in x for a unit y increase
+	this.type;                 // Clip / subject edge flag
+	this.bside = [];           // Bundle left / right indicators
+	this.bstate = [];          // Edge bundle state
+	this.outp = [];            // Output polygon / tristrip pointer
+	this.prev;                 // Previous edge in the AET
+	this.next;                 // Next edge in the AET
+	this.pred;                 // Edge connected at the lower end
+	this.succ;                 // Edge connected at the upper end
+	this.next_bound;           // Pointer to next bound in LMT
+};
+
 // ItNode
 var ItNode = function(edge0, edge1, x, y, next) {
 	this.ie = [];                // Intersecting edge (bundle) pair
@@ -43,6 +80,13 @@ var ItNode = function(edge0, edge1, x, y, next) {
 	this.next = next;            // The next intersection table node
 	this.ie[0] = edge0;
 	this.ie[1] = edge1;
+};
+
+// LmtNode
+var LmtNode = function(yvalue) {
+	this.y = yvalue;   // Y coordinate at local minimum
+	this.first_bound;  // Pointer to bound list
+	this.next;         // Pointer to next local minimum
 };
 
 // StNode

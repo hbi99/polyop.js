@@ -1,10 +1,10 @@
 
 // TopPolygonNode
-GEOMETRY.TopPolygonNode = function() {
+var TopPolygonNode = function() {
 	this.top_node;
 };
 
-GEOMETRY.TopPolygonNode.prototype = {
+TopPolygonNode.prototype = {
 	add_local_min: function(x, y) {
 		 var existing_min = this.top_node;
 		 this.top_node = new PolygonNode(existing_min, x, y);

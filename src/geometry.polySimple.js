@@ -7,7 +7,7 @@
  *
  * @author  Dan Bridenbecker, Solution Engineering, Inc.
  */
-GEOMETRY.PolySimple = function() {
+var PolySimple = function() {
 	this.m_List = new ArrayList(); // The list of Point objects in the polygon.
 	this.m_Contributes = true;     // Flag used by the Clip algorithm
 };
@@ -18,7 +18,7 @@ GEOMETRY.PolySimple = function() {
 * <strong>WARNING:</strong> This method failse if the first point
 * appears more than once in the list.
 */
-GEOMETRY.PolySimple.prototype = {
+PolySimple.prototype = {
 	equals: function(obj) {
 		if (!(obj instanceof PolySimple)) return false;
 

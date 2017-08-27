@@ -14,15 +14,14 @@
  * @author  Dan Bridenbecker, Solution Engineering, Inc.
  */
 
-GEOMETRY.PolyDefault = function(isHole) {
+var PolyDefault = function(isHole) {
 	if (isHole == null) isHole = false;
 	// Only applies to the first poly and can only be used with a poly that contains one poly
 	this.m_IsHole = isHole;
 	this.m_List = new ArrayList();
 };
 
-
-GEOMETRY.PolyDefault.prototype = {
+PolyDefault.prototype = {
 	equals: function (obj) {
 		// Return true if the given object is equal to this one.
 		if (!(obj instanceof PolyDefault)) return false;
@@ -57,7 +56,7 @@ GEOMETRY.PolyDefault.prototype = {
 		} else if (args.length == 1) {
 			if (args[0] instanceof Point) {
 				this.addPoint(args[0]);	
-			} else if (args[0] instanceof GEOMETRY.PolySimple) {
+			} else if (args[0] instanceof PolySimple) {
 				this.addPoly(args[0]);
 			} else if (args[0] instanceof Array) {
 				arr = args[0];

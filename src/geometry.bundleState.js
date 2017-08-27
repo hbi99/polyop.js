@@ -1,14 +1,14 @@
 
 // bundle state
-GEOMETRY.BundleState = function(state) {
+var BundleState = function(state) {
 	this.m_State = state ; // string
 };
 
-GEOMETRY.BundleState.UNBUNDLED   = new GEOMETRY.BundleState('UNBUNDLED');
-GEOMETRY.BundleState.BUNDLE_HEAD = new GEOMETRY.BundleState('BUNDLE_HEAD');
-GEOMETRY.BundleState.BUNDLE_TAIL = new GEOMETRY.BundleState('BUNDLE_TAIL');
+BundleState.UNBUNDLED   = new BundleState('UNBUNDLED');
+BundleState.BUNDLE_HEAD = new BundleState('BUNDLE_HEAD');
+BundleState.BUNDLE_TAIL = new BundleState('BUNDLE_TAIL');
 
-GEOMETRY.BundleState.prototype = {
+BundleState.prototype = {
 	toString: function() {
 		return this.m_State;
 	}

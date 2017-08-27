@@ -1,18 +1,18 @@
 
 // ScanBeamTree
-GEOMETRY.ScanBeamTree = function(yvalue) {
+var ScanBeamTree = function(yvalue) {
 	this.y = yvalue;  // Scanbeam node y value
 	this.less;        // Pointer to nodes with lower y
 	this.more;        // Pointer to nodes with higher y
 };
 
 // ScanBeamTreeEntries
-GEOMETRY.ScanBeamTreeEntries = function() {
+var ScanBeamTreeEntries = function() {
 	this.sbt_entries = 0;
 	this.sb_tree;
 };
 
-GEOMETRY.ScanBeamTreeEntries.prototype = {
+ScanBeamTreeEntries.prototype = {
 	build_sbt: function() {
 		var sbt = [],
 			entries = 0;

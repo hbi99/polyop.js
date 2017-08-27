@@ -1,11 +1,10 @@
 
-
 // edgeTable
-GEOMETRY.EdgeTable = function() {
+var EdgeTable = function() {
 	this.m_List = new ArrayList();
 };
 
-GEOMETRY.EdgeTable.prototype = {
+EdgeTable.prototype = {
 	addNode: function(x,y) {
 		var node = new EdgeNode();
 		node.vertex.x = x;

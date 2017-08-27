@@ -1,5 +1,5 @@
 
-GEOMETRY.Clip = {
+var Clip = {
 	DEBUG: false,
 	GPC_EPSILON: 2.2204460492503131e-016,
 	GPC_VERSION: '2.31',
