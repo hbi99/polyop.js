@@ -1,7 +1,7 @@
 
 @@include('junior.js')
 
-(function(win, doc) {
+(function(win, doc, $) {
 	'use strict';
 
 	var poly1 = [[30, 30], [300, 30], [300, 250], [30, 250]];
@@ -10,6 +10,7 @@
 	var demo = {
 		init: function() {
 			// fast references
+			this.doc = $(doc);
 			this.vertices = {
 				poly1: poly1,
 				poly2: poly2
@@ -23,9 +24,7 @@
 				}
 			}
 			// a few event handlers
-			doc.addEventListener('mouseup', this.doEvent, false);
-			doc.addEventListener('mousedown', this.doEvent, false);
-			doc.addEventListener('mousemove', this.doEvent, false);
+			this.doc.bind('mouseup mousedown mousemove', this.doEvent);
 
 			// painter
 			this.draw.poly(this.vertices);
@@ -188,4 +187,4 @@
 
 	window.onload = demo.init.bind(demo);
 
-})(window, document);
+})(window, document, jr);
