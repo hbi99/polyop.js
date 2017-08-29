@@ -1,4 +1,6 @@
 
+@@include('junior.js')
+
 (function(win, doc) {
 	'use strict';
 
@@ -31,12 +33,12 @@
 		doEvent: function(event) {
 			var self = demo,
 				cmd = event.type,
-				vertices = self.vertices,
-				vx,
-				len,
 				radius = self.vertexRadius,
 				mx = event.pageX - self.draw.rect.left,
 				my = event.pageY - self.draw.rect.top,
+				vertices = self.vertices,
+				vx,
+				len,
 				ox, oy,
 				isVertex,
 				vertex;

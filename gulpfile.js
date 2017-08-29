@@ -18,11 +18,11 @@ var include_options = {
 		basepath  : '@file'
 	},
 	srcPaths = {
-		script  : ['src/**/*.js', 'src/polyop.js'],
+		script  : ['src/**/*.js', 'src/polyop.js', 'demo/res/**/*.js', 'demo/res/demo.js'],
 		styles  : ['demo/res/style.less']
 	},
 	destPaths = {
-		script  : ['dist/'],
+		script  : ['dist/', 'demo/res/'],
 		styles  : ['demo/res/']
 	};
 
@@ -49,6 +49,16 @@ gulp.task('styles:demo', function() {
 });
 
 // Processes javascript files
+gulp.task('scripts:demo', function() {
+	return gulp.src(srcPaths.script[3])
+		.pipe($.fileInclude(include_options))
+	//	.pipe($.uglify())
+		.pipe($.rename({suffix: '.min'}))
+		.pipe(gulp.dest(destPaths.script[1]))
+		.pipe($.size({title: 'scripts'}));
+});
+
+// Processes javascript files
 gulp.task('scripts', function() {
 	return gulp.src(srcPaths.script[1])
 		.pipe($.fileInclude(include_options))
@@ -61,6 +71,12 @@ gulp.task('scripts', function() {
 // Watch source files and moves them accordingly
 gulp.task('watch', function() {
 	gulp.watch(srcPaths.script[0], ['scripts']);
+	gulp.watch(srcPaths.script[2], ['scripts:demo']);
 	gulp.watch(srcPaths.styles[0], ['styles:demo']);
+});
+
+// This task is for frontend development
+gulp.task('frontend', function(cb) {
+	sequence(['scripts', 'scripts:demo', 'styles:demo'], 'watch', cb);
 });
 
