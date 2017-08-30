@@ -4,8 +4,8 @@
 (function(win, doc, $) {
 	'use strict';
 
-	var poly1 = [[30, 30], [300, 30], [300, 250], [30, 250]];
-	var poly2 = [[130, 130], [400, 130], [400, 350], [130, 350]];
+	var poly1 = [[30, 30], [300, 30], [300, 250], [30, 250]],
+		poly2 = [[130, 130], [400, 130], [400, 350], [130, 350]];
 
 	var demo = {
 		init: function() {
@@ -25,28 +25,39 @@
 			}
 			// a few event handlers
 			this.doc.bind('mouseup mousedown mousemove', this.doEvent);
+			this.doc.on('click', '[data-cmd]', this.doEvent);
 
 			// painter
 			this.draw.poly(this.vertices);
 		},
 		doEvent: function(event) {
 			var self = demo,
-				cmd = event.type,
+				cmd = (typeof event === 'string') ? event: event.type,
 				radius = self.vertexRadius,
 				mx = event.pageX - self.draw.rect.left,
 				my = event.pageY - self.draw.rect.top,
 				vertices = self.vertices,
+				srcEl,
 				vx,
 				len,
 				ox, oy,
 				isVertex,
 				vertex;
+			//console.log(cmd);
 			switch(cmd) {
+				// native events
+				case 'click':
+					srcEl = $(this);
+					if (!srcEl) return;
+					// stop default behavior
+					event.preventDefault();
+					// forward event
+					return self.doEvent(srcEl.attr('data-cmd'), srcEl, event);
 				case 'mousedown':
 					// prevent default behaviour
 					event.preventDefault();
 				case 'mousemove':
-					if (cmd === 'mousemove') {
+					if (cmd === 'mousemove' && (vertices.poly1._selected > -1 || vertices.poly2._selected > -1)) {
 						ox = mx + self._clickX;
 						oy = my + self._clickY;
 						if (vertices.poly1._selected > -1) vertices.poly1[vertices.poly1._selected] = [ox, oy];
@@ -63,7 +74,7 @@
 							isVertex = Math.sqrt((ox * ox) + (oy * oy)) <= radius;
 							if (isVertex) {
 								if (cmd === 'mousedown') {
-									vertices.poly1._selected = len;
+									vx._selected = len;
 									self._clickX = ox;
 									self._clickY = oy;
 								} else {
@@ -83,7 +94,7 @@
 							isVertex = Math.sqrt((ox * ox) + (oy * oy)) <= radius;
 							if (isVertex) {
 								if (cmd === 'mousedown') {
-									vertices.poly2._selected = len;
+									vx._selected = len;
 									self._clickX = ox;
 									self._clickY = oy;
 								} else {
@@ -99,6 +110,15 @@
 				case 'mouseup':
 					vertices.poly1._selected = -1;
 					vertices.poly2._selected = -1;
+					break;
+				// custom events
+				case 'operation-difference':
+					break;
+				case 'operation-intersection':
+					break;
+				case 'operation-union':
+					break;
+				case 'operation-xor':
 					break;
 			}
 		},
@@ -153,9 +173,9 @@
 				for (i=0, il=vertices.poly1.length; i<il; i++) {
 					ctx.beginPath();
 					switch (i) {
+						case _hovered:
 						case _selected: ctx.strokeStyle = 'rgba(100,100,200,0.65)'; break;
-						case _hovered: ctx.strokeStyle = 'rgba(100,100,100,0.5)'; break;
-						default: ctx.strokeStyle = 'rgba(200,100,100,0.85)';
+						default: ctx.strokeStyle = 'rgba(100,100,100,0.85)';
 					}
 					ctx.fillStyle = '#fff';
 					
@@ -171,9 +191,9 @@
 				for (i=0, il=vertices.poly2.length; i<il; i++) {
 					ctx.beginPath();
 					switch (i) {
+						case _hovered:
 						case _selected: ctx.strokeStyle = 'rgba(100,100,200,0.65)'; break;
-						case _hovered: ctx.strokeStyle = 'rgba(100,100,100,0.5)'; break;
-						default: ctx.strokeStyle = 'rgba(200,100,100,0.85)';
+						default: ctx.strokeStyle = 'rgba(100,100,100,0.85)';
 					}
 					ctx.fillStyle = '#fff';
 					
