@@ -17,6 +17,8 @@
 			};
 			this.vertexRadius = 10;
 
+			this.doEvent('create-polygon', poly1);
+
 			// initate it all
 			for (var name in this) {
 				if (typeof(this[name].init) === 'function') {
@@ -34,12 +36,13 @@
 			var self = demo,
 				cmd = (typeof event === 'string') ? event: event.type,
 				radius = self.vertexRadius,
-				mx = event.pageX - self.draw.rect.left,
-				my = event.pageY - self.draw.rect.top,
+				mx,
+				my,
 				vertices = self.vertices,
 				srcEl,
 				vx,
 				len,
+				i, il, res,
 				ox, oy,
 				isVertex,
 				vertex;
@@ -57,6 +60,8 @@
 					// prevent default behaviour
 					event.preventDefault();
 				case 'mousemove':
+					mx = event.pageX - self.draw.rect.left;
+					my = event.pageY - self.draw.rect.top;
 					if (cmd === 'mousemove' && (vertices.poly1._selected > -1 || vertices.poly2._selected > -1)) {
 						ox = mx + self._clickX;
 						oy = my + self._clickY;
@@ -112,6 +117,14 @@
 					vertices.poly2._selected = -1;
 					break;
 				// custom events
+				case 'create-polygon':
+					res = new polyop.PolyDefault();
+					vx = arguments[1];
+					for(i=0, il=vx.length; i<il; i++) {    
+						res.addPoint(new polyop.Point(vx[i][0], vx[i][1]));
+					}
+					console.log(res);
+					break;
 				case 'operation-difference':
 					break;
 				case 'operation-intersection':
