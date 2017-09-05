@@ -128,7 +128,7 @@ var VertexType = {
 	}
 };
 
-var parse = function(vx) {
+var createPolygon = function(vx) {
 	var res = new PolyDefault(),
 		il = vx.length,
 		i = 0;
@@ -136,6 +136,16 @@ var parse = function(vx) {
 		res.addPoint(new Point(vx[i][0], vx[i][1]));
 	}
 	return res;
+};
+
+var getVertices = function(poly) {
+	var vertices = [],
+		il = poly.getNumPoints(),
+		i = 0;
+	for (; i<il; i++) {
+		vertices.push([poly.getX(i), poly.getY(i)]);
+	}
+	return vertices;
 };
 
 var equals = function(x1, x) {
@@ -277,6 +287,7 @@ ArrayList.prototype = {
 	}
 };
 
+/*
 // publish to polyDefault;
 polyop.Point       = Point;
 polyop.Line        = Line;
@@ -288,3 +299,4 @@ polyop.StNode      = StNode;
 polyop.VertexNode  = VertexNode;
 polyop.ArrayList   = ArrayList;
 polyop.ArrayHelper = ArrayHelper;
+*/

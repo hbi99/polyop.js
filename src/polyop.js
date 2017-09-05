@@ -3,18 +3,9 @@
 	'use strict';
 
 	var polyop = {
-		getVertices: function(poly) {
-			var vertices = [],
-				il = poly.getNumPoints(),
-				i = 0;
-			for (; i<il; i++) {
-				vertices.push([poly.getX(i), poly.getY(i)]);
-			}
-			return vertices;
-		},
 		clip: function(operation, vx1, vx2) {
-			var poly1 = parse(vx1),
-				poly2 = parse(vx2),
+			var poly1 = createPolygon(vx1),
+				poly2 = createPolygon(vx2),
 				diff = poly1[operation](poly2),
 				num = diff.getNumInnerPoly(),
 				n = 0,
@@ -24,7 +15,7 @@
 				innerPoly = diff.getInnerPoly(n);
 				
 				ret.push({
-					vertices: this.getVertices(innerPoly),
+					vertices: getVertices(innerPoly),
 					isHole: innerPoly.isHole()
 				});
 			}

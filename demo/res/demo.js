@@ -155,13 +155,14 @@
 
 				// clear canvas
 				ctx.clearRect(0, 0, 1e4, 1e4);
-				
-				// set clip color
-				ctx.fillStyle = 'rgba(200,0,0,0.45)';
 
 				// polygon
 				for (i=0, il=clip.length; i<il; i++) {
 					poly = clip[i].vertices;
+
+					// set clip color
+					ctx.fillStyle = clip[i].isHole ? '#fff' : 'rgba(200,0,0,0.35)';
+
 					ctx.beginPath();
 					ctx.moveTo(poly[0][0], poly[0][1]);
 					for (j=1, jl=poly.length; j<jl; j++) {
