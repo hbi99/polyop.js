@@ -128,6 +128,16 @@ var VertexType = {
 	}
 };
 
+var parse = function(vx) {
+	var res = new PolyDefault(),
+		il = vx.length,
+		i = 0;
+	for(; i<il; i++) {
+		res.addPoint(new Point(vx[i][0], vx[i][1]));
+	}
+	return res;
+};
+
 var equals = function(x1, x) {
 	var p;
 	for (p in x1) {

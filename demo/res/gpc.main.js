@@ -87,7 +87,7 @@ var xor = function(e) {
 	drawPoly(poly1, "blue", 0, -8);
 	drawPoly(poly2, "red", 0, -8);
 		
-	var diff = poly1.xor	(poly2);
+	var diff = poly1.xor(poly2);
 	drawPoly(diff, "green", 0, 150);
 }
 
@@ -121,8 +121,8 @@ var drawPoly = function(polygon,strokeColor,ox,oy) {
 		var poly = polygon.getInnerPoly(i);
 		var vertices  = getPolygonVertices(poly);
 
-		if (i==0) drawSinglePoly(vertices,strokeColor,poly.isHole(),ox,oy);
-		else drawSinglePoly(vertices,colors[i%num],poly.isHole(),ox,oy);
+		if (i==0) drawSinglePoly(vertices, strokeColor, poly.isHole(), ox, oy);
+		else drawSinglePoly(vertices, colors[i%num], poly.isHole(), ox, oy);
 	}
 }
 	

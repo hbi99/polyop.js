@@ -1,13 +1,19 @@
 
+@@include('sizzle.min.js')
 @@include('junior.js')
 
 (function(win, doc, $) {
 	'use strict';
 
-	var poly1 = [[30, 30], [300, 30], [300, 250], [30, 250]],
+	var poly1 = [[30, 30], [300, 30], [300, 410], [30, 250]],
 		poly2 = [[130, 130], [400, 130], [400, 350], [130, 350]];
 
 	var demo = {
+		// difference
+		// intersection
+		// union
+		// xor
+		operation: 'difference',
 		init: function() {
 			// fast references
 			this.doc = $(doc);
@@ -17,22 +23,21 @@
 			};
 			this.vertexRadius = 10;
 
-			this.doEvent('create-polygon', poly1);
-
 			// initate it all
 			for (var name in this) {
 				if (typeof(this[name].init) === 'function') {
 					this[name].init(this);
 				}
 			}
+
+			// initial operation
+			this.doEvent('perform-operation');
+
 			// a few event handlers
 			this.doc.bind('mouseup mousedown mousemove', this.doEvent);
-			this.doc.on('click', '[data-cmd]', this.doEvent);
-
-			// painter
-			this.draw.poly(this.vertices);
+			this.doc.on('click', '[data-cmd]', this.doEvent).trigger('mousemove');
 		},
-		doEvent: function(event) {
+		doEvent: function(event, el, orgEvent) {
 			var self = demo,
 				cmd = (typeof event === 'string') ? event: event.type,
 				radius = self.vertexRadius,
@@ -67,6 +72,8 @@
 						oy = my + self._clickY;
 						if (vertices.poly1._selected > -1) vertices.poly1[vertices.poly1._selected] = [ox, oy];
 						if (vertices.poly2._selected > -1) vertices.poly2[vertices.poly2._selected] = [ox, oy];
+
+						self.doEvent('perform-operation');
 					} else {
 						// polygon 1 vertices
 						vx = vertices.poly1;
@@ -110,28 +117,26 @@
 						}
 					}
 					// painter
-					self.draw.poly(vertices);
+					self.draw.clip();
 					break;
 				case 'mouseup':
 					vertices.poly1._selected = -1;
 					vertices.poly2._selected = -1;
 					break;
 				// custom events
-				case 'create-polygon':
-					res = new polyop.PolyDefault();
-					vx = arguments[1];
-					for(i=0, il=vx.length; i<il; i++) {    
-						res.addPoint(new polyop.Point(vx[i][0], vx[i][1]));
-					}
-					console.log(res);
+				case 'perform-operation':
+					self.clip = polyop.clip(self.operation, poly1, poly2);
 					break;
 				case 'operation-difference':
-					break;
 				case 'operation-intersection':
-					break;
 				case 'operation-union':
-					break;
 				case 'operation-xor':
+					self.operation = cmd.split('-')[1];
+					self.doEvent('perform-operation');
+					self.doc.trigger('mousemove');
+
+					el.parent().find('.active').removeClass('active');
+					el.addClass('active');
 					break;
 			}
 		},
@@ -141,11 +146,37 @@
 				this.ctx = this.cvs.getContext('2d');
 				this.rect = this.cvs.getBoundingClientRect()
 			},
+			clip: function() {
+				var ctx = this.ctx,
+					clip = demo.clip,
+					poly,
+					il, i,
+					jl, j;
+
+				// clear canvas
+				ctx.clearRect(0, 0, 1e4, 1e4);
+				
+				// set clip color
+				ctx.fillStyle = 'rgba(200,0,0,0.45)';
+
+				// polygon
+				for (i=0, il=clip.length; i<il; i++) {
+					poly = clip[i].vertices;
+					ctx.beginPath();
+					ctx.moveTo(poly[0][0], poly[0][1]);
+					for (j=1, jl=poly.length; j<jl; j++) {
+						ctx.lineTo(poly[j][0], poly[j][1]);
+					}
+					ctx.closePath();
+					ctx.fill();
+				}
+
+				this.poly(demo.vertices);
+			},
 			poly: function(vertices) {
 				var ctx = this.ctx,
 					il, i;
 
-				ctx.clearRect(0, 0, 1e4, 1e4);
 				ctx.lineWidth = 3;
 				ctx.strokeStyle = '#369';
 				
