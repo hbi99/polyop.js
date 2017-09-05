@@ -52,7 +52,7 @@ gulp.task('styles:demo', function() {
 gulp.task('scripts:demo', function() {
 	return gulp.src(srcPaths.script[3])
 		.pipe($.fileInclude(include_options))
-	//	.pipe($.uglify())
+		.pipe($.uglify())
 		.pipe($.rename({suffix: '.min'}))
 		.pipe(gulp.dest(destPaths.script[1]))
 		.pipe($.size({title: 'scripts'}));
@@ -62,7 +62,7 @@ gulp.task('scripts:demo', function() {
 gulp.task('scripts', function() {
 	return gulp.src(srcPaths.script[1])
 		.pipe($.fileInclude(include_options))
-	//	.pipe($.uglify())
+		.pipe($.uglify())
 		.pipe($.rename({suffix: '.min'}))
 		.pipe(gulp.dest(destPaths.script[0]))
 		.pipe($.size({title: 'scripts'}));
@@ -71,7 +71,7 @@ gulp.task('scripts', function() {
 // Watch source files and moves them accordingly
 gulp.task('watch', function() {
 	gulp.watch(srcPaths.script[0], ['scripts']);
-	gulp.watch(srcPaths.script[2], ['scripts:demo']);
+	gulp.watch(srcPaths.script[3], ['scripts:demo']);
 	gulp.watch(srcPaths.styles[0], ['styles:demo']);
 });
 
