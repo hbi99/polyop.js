@@ -219,7 +219,7 @@
 					ctx.beginPath();
 					switch (i) {
 						case _hovered:
-						case _selected: ctx.strokeStyle = 'rgba(100,100,200,0.65)'; break;
+						case _selected: ctx.strokeStyle = 'rgba(200,0,0,1)'; break;
 						default: ctx.strokeStyle = 'rgba(100,100,100,0.85)';
 					}
 					ctx.fillStyle = '#fff';
@@ -237,7 +237,7 @@
 					ctx.beginPath();
 					switch (i) {
 						case _hovered:
-						case _selected: ctx.strokeStyle = 'rgba(100,100,200,0.65)'; break;
+						case _selected: ctx.strokeStyle = 'rgba(200,0,0,1)'; break;
 						default: ctx.strokeStyle = 'rgba(100,100,100,0.85)';
 					}
 					ctx.fillStyle = '#fff';
