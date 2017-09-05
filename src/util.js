@@ -128,7 +128,7 @@ var VertexType = {
 	}
 };
 
-var createPolygon = function(vx) {
+var createSegment = function(vx) {
 	var res = new PolyDefault(),
 		il = vx.length,
 		i = 0;
@@ -138,12 +138,12 @@ var createPolygon = function(vx) {
 	return res;
 };
 
-var getVertices = function(poly) {
+var getVertices = function(segment) {
 	var vertices = [],
-		il = poly.getNumPoints(),
+		il = segment.getNumPoints(),
 		i = 0;
 	for (; i<il; i++) {
-		vertices.push([poly.getX(i), poly.getY(i)]);
+		vertices.push([segment.getX(i), segment.getY(i)]);
 	}
 	return vertices;
 };

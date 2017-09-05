@@ -4,9 +4,9 @@
 
 	var polyop = {
 		clip: function(operation, vx1, vx2) {
-			var poly1 = createPolygon(vx1),
-				poly2 = createPolygon(vx2),
-				diff = poly1[operation](poly2),
+			var segm1 = createSegment(vx1),
+				segm2 = createSegment(vx2),
+				diff = segm1[operation](segm2),
 				num = diff.getNumInnerPoly(),
 				n = 0,
 				innerPoly,

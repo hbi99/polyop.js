@@ -110,7 +110,7 @@ var getPolygonVertices = function(poly) {
 	return vertices;
 }
 
-var drawPoly = function(polygon,strokeColor,ox,oy) {
+var drawPoly = function(polygon, strokeColor, ox, oy) {
 	var num = polygon.getNumInnerPoly();
 	var i;
 	
@@ -126,7 +126,7 @@ var drawPoly = function(polygon,strokeColor,ox,oy) {
 	}
 }
 	
-var drawSinglePoly = function(vertices,strokeColor,hole,ox,oy) {
+var drawSinglePoly = function(vertices, strokeColor, hole, ox, oy) {
 	var i;
 
 	if (ox == undefined) ox = 0;
