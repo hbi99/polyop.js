@@ -5,7 +5,7 @@
 (function(win, doc, $) {
 	'use strict';
 
-	var poly1 = [[30, 30], [300, 30], [300, 410], [30, 250]],
+	var poly1 = [[30, 270], [300, 30], [300, 410], [190, 250]],
 		poly2 = [[130, 130], [400, 130], [400, 350], [130, 350]];
 
 	var demo = {
@@ -13,7 +13,7 @@
 		// intersection
 		// union
 		// xor
-		operation: 'difference',
+		operation: 'xor',
 		init: function() {
 			// fast references
 			this.doc = $(doc);
@@ -126,6 +126,7 @@
 				// custom events
 				case 'perform-operation':
 					self.clip = polyop.clip(self.operation, poly1, poly2);
+					//console.log(JSON.stringify(self.clip, false, '   '));
 					break;
 				case 'operation-difference':
 				case 'operation-intersection':
@@ -150,14 +151,15 @@
 				var ctx = this.ctx,
 					clip = demo.clip,
 					poly,
-					il, i,
+					il = clip.length,
+					i = 0,
 					jl, j;
 
 				// clear canvas
-				ctx.clearRect(0, 0, 1e4, 1e4);
+				ctx.clearRect(0, 0, 1e5, 1e5);
 
 				// polygon
-				for (i=0, il=clip.length; i<il; i++) {
+				for (; i<il; i++) {
 					poly = clip[i].vertices;
 
 					// set clip color
