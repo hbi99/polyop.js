@@ -247,12 +247,12 @@ PolyDefault.prototype = {
 	getArea: function() {
 		// Return the area of the polygon in square units.
 		var area = 0.0,
-			il = getNumInnerPoly(),
+			il = this.getNumInnerPoly(),
 			i = 0,
 			p,
 			tarea;
 		for (; i<il; i++) {
-			p = getInnerPoly(i);
+			p = this.getInnerPoly(i);
 			tarea = p.getArea() * (p.isHole() ? -1.0 : 1.0);
 			area += tarea;
 		}

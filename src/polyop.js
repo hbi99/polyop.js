@@ -3,6 +3,10 @@
 	'use strict';
 
 	var polyop = {
+		getArea: function(vx) {
+			var segm = createSegment(vx);
+			return segm.getArea();
+		},
 		clip: function(operation, vx1, vx2) {
 			var segm1 = createSegment(vx1),
 				segm2 = createSegment(vx2),
@@ -28,10 +32,8 @@
 	@@include('geometry.aeTree.js')
 	@@include('geometry.bundleState.js')
 	@@include('geometry.edgeTable.js')
-	@@include('geometry.IntersectionPoint.js')
 	@@include('geometry.itNodeTable.js')
 	@@include('geometry.lineHelper.js')
-	@@include('geometry.lineIntersection.js')
 	@@include('geometry.lmtTable.js')
 	@@include('geometry.operationType.js')
 	@@include('geometry.polyDefault.js')

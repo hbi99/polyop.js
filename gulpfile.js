@@ -18,7 +18,7 @@ var include_options = {
 		basepath  : '@file'
 	},
 	srcPaths = {
-		script  : ['src/**/*.js', 'src/polyop.js', 'demo/res/**/*.js', 'demo/res/demo.js'],
+		script  : ['src/**/*.js', 'src/polyop.js', 'demo/res/**/*.js', 'demo/res/demo.*.js'],
 		styles  : ['demo/res/style.less']
 	},
 	destPaths = {
@@ -33,8 +33,8 @@ var include_options = {
 
 gulp.task('help', function() {
 	console.log('\n----------------------------------------------------------------------------------\n');
-	console.log('  gulp scripts'.white    +'\t\t'.grey);
-	console.log('  gulp styles:demo'.white    +'\t\t'.grey);
+	console.log('  gulp watch'.white    +'\t\t'.grey);
+	console.log('  gulp frontend'.white    +'\t\t'.grey);
 	console.log('\n----------------------------------------------------------------------------------\n\n');
 });
 
@@ -49,19 +49,27 @@ gulp.task('styles:demo', function() {
 });
 
 // Processes javascript files
+gulp.task('scripts:delmin', function() {
+	return gulp.src('demo/res/demo.*.min.js', {read: false})
+        .pipe($.clean())
+		.pipe($.size({title: 'scripts:delmin'}));
+});
+
+// Processes javascript files
 gulp.task('scripts:demo', function() {
-	return gulp.src(srcPaths.script[3])
+	return gulp.src([srcPaths.script[3], '!demo/res/demo.*.min.*'])
 		.pipe($.fileInclude(include_options))
-		.pipe($.uglify())
+	//	.pipe($.uglify())
 		.pipe($.rename({suffix: '.min'}))
 		.pipe(gulp.dest(destPaths.script[1]))
-		.pipe($.size({title: 'scripts'}));
+		.pipe($.size({title: 'scripts:demo'}));
 });
 
 // Processes javascript files
 gulp.task('scripts', function() {
 	return gulp.src(srcPaths.script[1])
 		.pipe($.fileInclude(include_options))
+		.pipe(gulp.dest(destPaths.script[0]))
 		.pipe($.uglify())
 		.pipe($.rename({suffix: '.min'}))
 		.pipe(gulp.dest(destPaths.script[0]))
@@ -71,12 +79,12 @@ gulp.task('scripts', function() {
 // Watch source files and moves them accordingly
 gulp.task('watch', function() {
 	gulp.watch(srcPaths.script[0], ['scripts']);
-	gulp.watch(srcPaths.script[3], ['scripts:demo']);
+	gulp.watch([srcPaths.script[3], '!demo/res/demo.*.min.*'], ['scripts:delmin', 'scripts:demo']);
 	gulp.watch(srcPaths.styles[0], ['styles:demo']);
 });
 
 // This task is for frontend development
 gulp.task('frontend', function(cb) {
-	sequence(['scripts', 'scripts:demo', 'styles:demo'], 'watch', cb);
+	sequence(['scripts', 'scripts:delmin', 'scripts:demo', 'styles:demo'], 'watch', cb);
 });
 
