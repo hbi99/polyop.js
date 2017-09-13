@@ -3,6 +3,8 @@
 	'use strict';
 
 	var polyop = {
+		pointLineDistance: lineHelper.pointLineDistance,
+		lineIntersect: lineHelper.lineIntersect,
 		getArea: function(vx) {
 			var segm = createSegment(vx);
 			return segm.getArea();

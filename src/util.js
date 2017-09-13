@@ -22,12 +22,6 @@ function Point(x, y) {
 	this.y = y;
 }
 
-// Line
-function Line() {
-	this.start; 
-	this.end;
-}
-
 // Rectangle
 var Rectangle = function(x, y, w, h) {
 	this.x = x; 

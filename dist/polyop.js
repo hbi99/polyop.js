@@ -3,6 +3,8 @@
 	'use strict';
 
 	var polyop = {
+		pointLineDistance: lineHelper.pointLineDistance,
+		lineIntersect: lineHelper.lineIntersect,
 		getArea: function(vx) {
 			var segm = createSegment(vx);
 			return segm.getArea();
@@ -49,12 +51,6 @@ var NH = 0,
 function Point(x, y) {
 	this.x = x;
 	this.y = y;
-}
-
-// Line
-function Line() {
-	this.start; 
-	this.end;
 }
 
 // Rectangle
@@ -1468,7 +1464,52 @@ var LineHelper = {
 	roundPoint: function(p) {
 		p[0] = Math.round(p[0]);
 		p[1] = Math.round(p[1]);
-	}
+	},
+	pointLineDistance: function(point, line) {
+		var a = point[0] - line[0][0],
+			b = point[1] - line[0][1],
+			c = line[1][0] - line[0][0],
+			d = line[1][1] - line[0][1],
+			dot = a * c + b * d,
+			len_sq = c * c + d * d,
+			param = -1,
+			xx,
+			yy,
+			dx,
+			dy;
+
+		if (len_sq != 0) param = dot / len_sq;
+
+		if (param < 0) {
+			xx = line[0][0];
+			yy = line[0][1];
+		} else if (param > 1) {
+			xx = line[1][0];
+			yy = line[1][1];
+		} else {
+			xx = line[0][0] + param * c;
+			yy = line[0][1] + param * d;
+		}
+		dx = point[0] - xx;
+		dy = point[1] - yy;
+
+		return Math.floor(Math.sqrt(dx * dx + dy * dy));
+	},
+	lineIntersect: function(a, b) {
+		var dn = (b[1][1] - b[0][1]) * (a[1][0] - a[0][0]) - (b[1][0] - b[0][0]) * (a[1][1] - a[0][1]),
+			ua,
+			ub;
+		if (dn === 0) return;
+		
+		ua = ((b[1][0] - b[0][0]) * (a[0][1] - b[0][1]) - (b[1][1] - b[0][1]) * (a[0][0] - b[0][0])) / dn;
+		ub = ((a[1][0] - a[0][0]) * (a[0][1] - b[0][1]) - (a[1][1] - a[0][1]) * (a[0][0] - b[0][0])) / dn;
+		if (ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1) {
+			return [
+				a[0][0] + ua * (a[1][0] - a[0][0]),
+				a[0][1] + ua * (a[1][1] - a[0][1])
+			];
+		}
+	},
 };
 
 	
