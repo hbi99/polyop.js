@@ -2,9 +2,25 @@
 (function() {
 	'use strict';
 
+	@@include('util.js')
+	@@include('geometry.clip.js')
+	@@include('geometry.aeTree.js')
+	@@include('geometry.bundleState.js')
+	@@include('geometry.edgeTable.js')
+	@@include('geometry.itNodeTable.js')
+	@@include('geometry.lineHelper.js')
+	@@include('geometry.lmtTable.js')
+	@@include('geometry.operationType.js')
+	@@include('geometry.polyDefault.js')
+	@@include('geometry.polygon.js')
+	@@include('geometry.polygonNode.js')
+	@@include('geometry.polySimple.js')
+	@@include('geometry.topPolygonNode.js')
+	@@include('geometry.scanBeamTree.js')
+
 	var polyop = {
-		pointLineDistance: lineHelper.pointLineDistance,
-		lineIntersect: lineHelper.lineIntersect,
+		pointLineDistance: LineHelper.pointLineDistance,
+		lineIntersect: LineHelper.lineIntersect,
 		getArea: function(vx) {
 			var segm = createSegment(vx);
 			return segm.getArea();
@@ -28,22 +44,6 @@
 			return ret;
 		}
 	};
-
-	@@include('util.js')
-	@@include('geometry.clip.js')
-	@@include('geometry.aeTree.js')
-	@@include('geometry.bundleState.js')
-	@@include('geometry.edgeTable.js')
-	@@include('geometry.itNodeTable.js')
-	@@include('geometry.lineHelper.js')
-	@@include('geometry.lmtTable.js')
-	@@include('geometry.operationType.js')
-	@@include('geometry.polyDefault.js')
-	@@include('geometry.polygon.js')
-	@@include('geometry.polygonNode.js')
-	@@include('geometry.polySimple.js')
-	@@include('geometry.topPolygonNode.js')
-	@@include('geometry.scanBeamTree.js')
 
 	window.polyop = polyop;
 

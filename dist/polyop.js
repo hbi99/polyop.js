@@ -2,33 +2,6 @@
 (function() {
 	'use strict';
 
-	var polyop = {
-		pointLineDistance: lineHelper.pointLineDistance,
-		lineIntersect: lineHelper.lineIntersect,
-		getArea: function(vx) {
-			var segm = createSegment(vx);
-			return segm.getArea();
-		},
-		clip: function(operation, vx1, vx2) {
-			var segm1 = createSegment(vx1),
-				segm2 = createSegment(vx2),
-				diff = segm1[operation](segm2),
-				num = diff.getNumInnerPoly(),
-				n = 0,
-				innerPoly,
-				ret = [];
-			for (; n<num; n++) {
-				innerPoly = diff.getInnerPoly(n);
-				
-				ret.push({
-					vertices: getVertices(innerPoly),
-					isHole: innerPoly.isHole()
-				});
-			}
-			return ret;
-		}
-	};
-
 	
 // HState
 var NH = 0,
@@ -2445,6 +2418,33 @@ ScanBeamTreeEntries.prototype = {
 	}
 };
 
+
+	var polyop = {
+		pointLineDistance: LineHelper.pointLineDistance,
+		lineIntersect: LineHelper.lineIntersect,
+		getArea: function(vx) {
+			var segm = createSegment(vx);
+			return segm.getArea();
+		},
+		clip: function(operation, vx1, vx2) {
+			var segm1 = createSegment(vx1),
+				segm2 = createSegment(vx2),
+				diff = segm1[operation](segm2),
+				num = diff.getNumInnerPoly(),
+				n = 0,
+				innerPoly,
+				ret = [];
+			for (; n<num; n++) {
+				innerPoly = diff.getInnerPoly(n);
+				
+				ret.push({
+					vertices: getVertices(innerPoly),
+					isHole: innerPoly.isHole()
+				});
+			}
+			return ret;
+		}
+	};
 
 	window.polyop = polyop;
 
