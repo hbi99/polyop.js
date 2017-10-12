@@ -19,8 +19,10 @@
 	@@include('geometry.scanBeamTree.js')
 
 	var polyop = {
-		pointLineDistance: LineHelper.pointLineDistance,
-		lineIntersect: LineHelper.lineIntersect,
+		pointLineDistance : LineHelper.pointLineDistance,
+		lineIntersect     : LineHelper.lineIntersect,
+		distancePoints    : LineHelper.distancePoints,
+		isPointInPolygon  : isPointInPolygon,
 		getArea: function(vx) {
 			var segm = createSegment(vx);
 			return segm.getArea();

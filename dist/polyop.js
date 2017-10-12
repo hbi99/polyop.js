@@ -2420,8 +2420,9 @@ ScanBeamTreeEntries.prototype = {
 
 
 	var polyop = {
-		pointLineDistance: LineHelper.pointLineDistance,
-		lineIntersect: LineHelper.lineIntersect,
+		pointLineDistance : LineHelper.pointLineDistance,
+		lineIntersect     : LineHelper.lineIntersect,
+		distancePoints    : LineHelper.distancePoints,
 		getArea: function(vx) {
 			var segm = createSegment(vx);
 			return segm.getArea();
