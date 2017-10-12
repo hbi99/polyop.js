@@ -173,6 +173,25 @@ var equals = function(x1, x) {
 	return true;
 };
 
+var isPointInPolygon = function(point, poly) {
+	var x = point[0],
+		y = point[1],
+		i, il, j,
+		xi, yi,
+		xj, yj,
+		inside = false,
+		intersect;
+	for (i=0, il=poly.length, j=poly.length-1; i<il; j=i++) {
+		xi = poly[i][0];
+		yi = poly[i][1];
+		xj = poly[j][0];
+		yj = poly[j][1];
+		intersect = ((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+		if (intersect) inside = !inside;
+	}
+	return inside;
+};
+
 // ArrayHelper
 var ArrayHelper = {
 	create2DArray: function(x, y) {
@@ -2423,6 +2442,7 @@ ScanBeamTreeEntries.prototype = {
 		pointLineDistance : LineHelper.pointLineDistance,
 		lineIntersect     : LineHelper.lineIntersect,
 		distancePoints    : LineHelper.distancePoints,
+		isPointInPolygon  : isPointInPolygon,
 		getArea: function(vx) {
 			var segm = createSegment(vx);
 			return segm.getArea();
