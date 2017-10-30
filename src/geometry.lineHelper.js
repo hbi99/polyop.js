@@ -62,7 +62,7 @@ var LineHelper = {
 		dx = point[0] - xx;
 		dy = point[1] - yy;
 
-		return Math.floor(Math.sqrt(dx * dx + dy * dy));
+		return Math.sqrt(dx * dx + dy * dy);
 	},
 	lineIntersect: function(a, b) {
 		var dn = (b[1][1] - b[0][1]) * (a[1][0] - a[0][0]) - (b[1][0] - b[0][0]) * (a[1][1] - a[0][1]),

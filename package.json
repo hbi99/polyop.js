@@ -1,6 +1,6 @@
 {
   "name": "polyop.js",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Javascript library for polygon operations",
   "engines": {
     "node": "6.3.0"
